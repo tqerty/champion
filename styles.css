@@ -1,0 +1,646 @@
+:root {
+  --bg-dark: #0d1f0d;
+  --bg-card: #152815;
+  --bg-elevated: #1a3319;
+  --green-primary: #2d5a27;
+  --green-accent: #3d7a35;
+  --gold: #c9a227;
+  --gold-light: #e8d48b;
+  --text: #e8f0e6;
+  --text-muted: #8fa88a;
+  --red: #b83434;
+  --border: rgba(61, 122, 53, 0.3);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background: var(--bg-dark);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  background-image: 
+    radial-gradient(ellipse at 20% 20%, rgba(45, 90, 39, 0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(201, 162, 39, 0.1) 0%, transparent 50%);
+}
+
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px 40px;
+}
+
+/* Навигация */
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: rgba(13, 31, 13, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+}
+
+.nav-brand {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--gold);
+  letter-spacing: 2px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.nav-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.nav-link:hover {
+  color: var(--gold);
+}
+
+/* Секции */
+.section {
+  padding: 50px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.section:last-of-type {
+  border-bottom: none;
+}
+
+.section-title {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 1.8rem;
+  margin-bottom: 12px;
+  color: var(--gold-light);
+}
+
+.section-desc {
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+/* Герой / Персонаж */
+.hero-section {
+  padding-top: 40px;
+}
+
+.hero-content {
+  display: flex;
+  justify-content: center;
+}
+
+.character-card {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  background: var(--bg-card);
+  border: 2px solid var(--green-primary);
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.character-visual {
+  flex-shrink: 0;
+}
+
+.character-avatar {
+  width: 180px;
+  height: 220px;
+  background: linear-gradient(180deg, #3a5c35 0%, #2d4a28 100%);
+  border-radius: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--gold);
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.3);
+}
+
+.avatar-face {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--gold-light);
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  z-index: 2;
+}
+
+.shoulder-straps {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
+}
+
+.strap {
+  width: 35px;
+  height: 45px;
+  background: #4a3728;
+  border-radius: 4px;
+  margin-top: -5px;
+  position: relative;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+}
+
+.strap::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 3px;
+  background: var(--gold);
+  border-radius: 2px;
+}
+
+.rank-badge {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.character-info {
+  min-width: 280px;
+}
+
+.character-name {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 1.8rem;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+.character-rank {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.xp-bar-container {
+  margin-top: 20px;
+}
+
+.xp-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.xp-bar {
+  height: 12px;
+  background: var(--bg-dark);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green-primary), var(--green-accent));
+  border-radius: 6px;
+  width: 0%;
+  transition: width 0.5s ease;
+}
+
+/* Достижения */
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.achievement {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  opacity: 0.5;
+  transition: all 0.3s;
+}
+
+.achievement.unlocked {
+  opacity: 1;
+  border-color: var(--gold);
+  box-shadow: 0 0 20px rgba(201, 162, 39, 0.2);
+}
+
+.achievement-icon {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.achievement.unlocked .achievement-icon {
+  filter: grayscale(0);
+}
+
+.achievement:not(.unlocked) .achievement-icon {
+  filter: grayscale(1);
+}
+
+.achievement-name {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.achievement-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Цели и задачи */
+.goals-add, .tasks-add {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+input[type="text"], input[type="number"] {
+  flex: 1;
+  min-width: 200px;
+  padding: 12px 16px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+input[type="number"] {
+  min-width: 80px;
+  flex: 0;
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: var(--green-accent);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--green-primary);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--gold);
+  border: 2px solid var(--gold);
+}
+
+.btn-secondary:hover {
+  background: rgba(201, 162, 39, 0.2);
+}
+
+.goals-list, .tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.goal-item, .task-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.goal-item.done, .task-item.done {
+  opacity: 0.6;
+}
+
+.goal-item.done .goal-text, .task-item.done .task-text {
+  text-decoration: line-through;
+}
+
+.task-xp {
+  color: var(--gold);
+  font-weight: 700;
+  min-width: 40px;
+}
+
+.task-check, .goal-check {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--green-accent);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.task-check.checked, .goal-check.checked {
+  background: var(--green-accent);
+}
+
+.task-check.checked::after, .goal-check.checked::after {
+  content: '✓';
+  color: white;
+  font-size: 0.9rem;
+}
+
+.delete-btn {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 4px;
+}
+
+.delete-btn:hover {
+  color: var(--red);
+}
+
+/* Звания */
+.ranks-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rank-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.rank-item.current {
+  border-color: var(--gold);
+  box-shadow: 0 0 15px rgba(201, 162, 39, 0.2);
+}
+
+.rank-item.unlocked {
+  border-color: var(--green-accent);
+}
+
+.rank-number {
+  width: 32px;
+  height: 32px;
+  background: var(--bg-elevated);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.rank-item.unlocked .rank-number {
+  background: var(--green-accent);
+}
+
+.rank-item.current .rank-number {
+  background: var(--gold);
+  color: var(--bg-dark);
+}
+
+.rank-name {
+  flex: 1;
+}
+
+.rank-req {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Квесты */
+.quests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.quest-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.quest-card.completed {
+  border-color: var(--green-accent);
+}
+
+.quest-title {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
+
+.quest-desc {
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.quest-requirements {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.quest-req {
+  padding: 8px 14px;
+  background: var(--bg-elevated);
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.quest-req.done {
+  background: rgba(61, 122, 53, 0.3);
+  color: var(--green-accent);
+}
+
+.quest-controls {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+/* Военные знания */
+.military-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.tab-btn {
+  padding: 12px 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover, .tab-btn.active {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.military-info {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 30px;
+}
+
+.military-info h3 {
+  margin-bottom: 20px;
+  color: var(--gold);
+}
+
+.military-info ul {
+  margin-bottom: 24px;
+  padding-left: 24px;
+}
+
+.military-info li {
+  margin-bottom: 12px;
+}
+
+/* Тест */
+.test-question {
+  margin-bottom: 24px;
+}
+
+.test-question label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.test-question input {
+  margin-right: 10px;
+}
+
+/* Модальное окно */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.8);
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-content {
+  background: var(--bg-card);
+  border: 2px solid var(--gold);
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 500px;
+  width: 90%;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  color: var(--text);
+}
+
+.modal-content h3 {
+  margin-bottom: 24px;
+  color: var(--gold);
+}
+
+/* Футер */
+.footer {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+  .character-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .nav-links {
+    justify-content: center;
+  }
+
+  .goals-add, .tasks-add {
+    flex-direction: column;
+  }
+
+  input[type="text"], input[type="number"] {
+    min-width: 100%;
+  }
+}

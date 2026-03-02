@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Чемпион — Твой путь к победе</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Навигация -->
+    <nav class="nav">
+      <div class="nav-brand">ЧЕМПИОН</div>
+      <div class="nav-links">
+        <a href="#hero" class="nav-link smooth-scroll">Персонаж</a>
+        <a href="#achievements" class="nav-link">Достижения</a>
+        <a href="#goals" class="nav-link">Цели</a>
+        <a href="#tasks" class="nav-link">Задачи</a>
+        <a href="#ranks" class="nav-link">Звания</a>
+        <a href="#quests" class="nav-link">Квесты</a>
+        <a href="#military" class="nav-link">Военка</a>
+      </div>
+    </nav>
+
+    <!-- Герой / Персонаж -->
+    <section id="hero" class="section hero-section">
+      <div class="hero-content">
+        <div class="character-card">
+          <div class="character-visual">
+            <div class="character-avatar" id="characterAvatar">
+              <div class="avatar-face">М</div>
+              <div class="shoulder-straps" id="shoulderStraps">
+                <div class="strap left" id="leftStrap"></div>
+                <div class="strap right" id="rightStrap"></div>
+              </div>
+              <div class="rank-badge" id="rankBadge"></div>
+            </div>
+          </div>
+          <div class="character-info">
+            <h1 class="character-name" id="characterName">Рядовой Минь</h1>
+            <p class="character-rank" id="displayRank">Рядовой</p>
+            <div class="xp-bar-container">
+              <div class="xp-label">
+                <span>Опыт: <strong id="totalXP">0</strong></span>
+                <span id="xpToNext">До ефрейтора: 100 XP</span>
+              </div>
+              <div class="xp-bar">
+                <div class="xp-fill" id="xpFill"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Достижения -->
+    <section id="achievements" class="section achievements-section">
+      <h2 class="section-title">🏆 Достижения</h2>
+      <div class="achievements-grid" id="achievementsGrid">
+        <div class="achievement" data-id="first_task">
+          <div class="achievement-icon">⭐</div>
+          <div class="achievement-name">Первый шаг</div>
+          <div class="achievement-desc">Выполни первую задачу</div>
+        </div>
+        <div class="achievement" data-id="efreitor">
+          <div class="achievement-icon">🎖️</div>
+          <div class="achievement-name">Ефрейтор</div>
+          <div class="achievement-desc">Получи звание ефрейтора</div>
+        </div>
+        <div class="achievement" data-id="sergeant">
+          <div class="achievement-icon">🎖️</div>
+          <div class="achievement-name">Сержант</div>
+          <div class="achievement-desc">Получи звание сержанта</div>
+        </div>
+        <div class="achievement" data-id="logic_book">
+          <div class="achievement-icon">📚</div>
+          <div class="achievement-name">Логик</div>
+          <div class="achievement-desc">Прочитай книгу по логике</div>
+        </div>
+        <div class="achievement" data-id="programming">
+          <div class="achievement-icon">💻</div>
+          <div class="achievement-name">Кодер</div>
+          <div class="achievement-desc">Попрограммируй 10 часов</div>
+        </div>
+        <div class="achievement" data-id="fitness">
+          <div class="achievement-icon">💪</div>
+          <div class="achievement-name">Атлет</div>
+          <div class="achievement-desc">Потренируйся 20 раз</div>
+        </div>
+        <div class="achievement" data-id="military_test">
+          <div class="achievement-icon">📋</div>
+          <div class="achievement-name">Знаток армии</div>
+          <div class="achievement-desc">Пройди тест по структуре ВС РФ</div>
+        </div>
+        <div class="achievement" data-id="ak47">
+          <div class="achievement-icon">🔫</div>
+          <div class="achievement-name">Эксперт АК-47</div>
+          <div class="achievement-desc">Пройди тест по устройству АК-47</div>
+        </div>
+        <div class="achievement" data-id="week_streak">
+          <div class="achievement-icon">🔥</div>
+          <div class="achievement-name">Неделя подряд</div>
+          <div class="achievement-desc">Выполняй задачи 7 дней подряд</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Мои цели -->
+    <section id="goals" class="section goals-section">
+      <h2 class="section-title">🎯 Мои цели</h2>
+      <div class="goals-add">
+        <input type="text" id="goalInput" placeholder="Добавить цель (например: прочитать книгу по логике)">
+        <button class="btn btn-primary" id="addGoalBtn">+ Добавить</button>
+      </div>
+      <div class="goals-list" id="goalsList"></div>
+    </section>
+
+    <!-- Ежедневные задачи -->
+    <section id="tasks" class="section tasks-section">
+      <h2 class="section-title">📋 Ежедневные задачи</h2>
+      <p class="section-desc">Выполняй задачи и получай опыт!</p>
+      <div class="tasks-add">
+        <input type="text" id="taskInput" placeholder="Новая задача">
+        <input type="number" id="taskXP" placeholder="XP" value="10" min="5" max="100">
+        <button class="btn btn-primary" id="addTaskBtn">+ Добавить</button>
+      </div>
+      <div class="tasks-list" id="tasksList"></div>
+    </section>
+
+    <!-- Звания -->
+    <section id="ranks" class="section ranks-section">
+      <h2 class="section-title">🎖️ Звания ВС РФ</h2>
+      <p class="section-desc">Прогресс по воинским званиям</p>
+      <div class="ranks-progress" id="ranksProgress"></div>
+    </section>
+
+    <!-- Квесты для повышения -->
+    <section id="quests" class="section quests-section">
+      <h2 class="section-title">⚔️ Квесты для повышения</h2>
+      <p class="section-desc">Выполни квесты, чтобы получить следующее звание</p>
+      <div class="quests-list" id="questsList"></div>
+      <div class="quest-controls">
+        <button class="btn btn-secondary" id="addProgram1">+1ч программирования</button>
+        <button class="btn btn-secondary" id="addTrain1">+1 тренировка</button>
+      </div>
+    </section>
+
+    <!-- Военные знания -->
+    <section id="military" class="section military-section">
+      <h2 class="section-title">📚 Военные знания</h2>
+      <div class="military-tabs">
+        <button class="tab-btn active" data-tab="structure">Структура ВС РФ</button>
+        <button class="tab-btn" data-tab="ak47">Устройство АК-47</button>
+      </div>
+      <div class="military-content">
+        <div class="tab-content active" id="tab-structure">
+          <div class="military-info">
+            <h3>Структура Вооружённых Сил РФ</h3>
+            <ul>
+              <li><strong>Сухопутные войска (СВ)</strong> — основа армии, пехота, танки, артиллерия</li>
+              <li><strong>Воздушно-космические силы (ВКС)</strong> — авиация, ПВО, космос</li>
+              <li><strong>Военно-морской флот (ВМФ)</strong> — надводные и подводные силы</li>
+              <li><strong>Ракетные войска стратегического назначения (РВСН)</strong></li>
+              <li><strong>Воздушно-десантные войска (ВДВ)</strong></li>
+            </ul>
+            <button class="btn btn-secondary" id="startStructureTest">Пройти тест</button>
+          </div>
+        </div>
+        <div class="tab-content" id="tab-ak47">
+          <div class="military-info">
+            <h3>Устройство автомата Калашникова (АК-47)</h3>
+            <ul>
+              <li><strong>Ствол</strong> — направляет пулю, имеет 4 правых нареза</li>
+              <li><strong>Затворная рама</strong> — приводит в действие затвор</li>
+              <li><strong>Затвор</strong> — запирает канал ствола при выстреле</li>
+              <li><strong>Магазин</strong> — на 30 патронов 7,62×39 мм</li>
+              <li><strong>Приклад</strong> — деревянный или складной</li>
+              <li><strong>Ударно-спусковой механизм</strong> — одиночный и автоматический огонь</li>
+            </ul>
+            <button class="btn btn-secondary" id="startAK47Test">Пройти тест</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Модальное окно теста -->
+    <div class="modal" id="testModal">
+      <div class="modal-content">
+        <button class="modal-close" id="closeTest">&times;</button>
+        <h3 id="testTitle">Тест</h3>
+        <div id="testBody"></div>
+        <button class="btn btn-primary" id="submitTest" style="display:none">Проверить</button>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <p>Чемпион — твой путь к победе. Рядовой Минь гордится тобой! 💪</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
