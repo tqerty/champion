@@ -508,6 +508,7 @@ input[type="number"] {
   display: flex;
   gap: 12px;
   margin-bottom: 24px;
+  flex-wrap: wrap;
 }
 
 .tab-btn {

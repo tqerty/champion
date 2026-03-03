@@ -77,7 +77,7 @@
         </div>
         <div class="achievement" data-id="logic_book">
           <div class="achievement-icon">📚</div>
-          <div class="achievement-name">Логик</div>
+          <div class="achievement-name">Логика</div>
           <div class="achievement-desc">Прочитай книгу по логике</div>
         </div>
         <div class="achievement" data-id="programming">
@@ -104,6 +104,46 @@
           <div class="achievement-icon">🔥</div>
           <div class="achievement-name">Неделя подряд</div>
           <div class="achievement-desc">Выполняй задачи 7 дней подряд</div>
+        </div>
+        <div class="achievement" data-id="officer_career">
+          <div class="achievement-icon">⭐</div>
+          <div class="achievement-name">Карьера офицера!</div>
+          <div class="achievement-desc">Получи звание младшего лейтенанта</div>
+        </div>
+        <div class="achievement" data-id="starshina">
+          <div class="achievement-icon">🎖️</div>
+          <div class="achievement-name">Старшина</div>
+          <div class="achievement-desc">Получи звание старшины</div>
+        </div>
+        <div class="achievement" data-id="praporshik">
+          <div class="achievement-icon">🎖️</div>
+          <div class="achievement-name">Прапорщик</div>
+          <div class="achievement-desc">Получи звание прапорщика</div>
+        </div>
+        <div class="achievement" data-id="captain">
+          <div class="achievement-icon">⭐</div>
+          <div class="achievement-name">Капитан</div>
+          <div class="achievement-desc">Получи звание капитана</div>
+        </div>
+        <div class="achievement" data-id="major">
+          <div class="achievement-icon">⭐</div>
+          <div class="achievement-name">Майор</div>
+          <div class="achievement-desc">Получи звание майора</div>
+        </div>
+        <div class="achievement" data-id="month_streak">
+          <div class="achievement-icon">🔥</div>
+          <div class="achievement-name">Месяц подряд</div>
+          <div class="achievement-desc">Выполняй задачи 30 дней подряд</div>
+        </div>
+        <div class="achievement" data-id="all_tests">
+          <div class="achievement-icon">📋</div>
+          <div class="achievement-name">Курсант</div>
+          <div class="achievement-desc">Пройди все военные тесты</div>
+        </div>
+        <div class="achievement" data-id="logic_pages">
+          <div class="achievement-icon">📖</div>
+          <div class="achievement-name">90 страниц логики</div>
+          <div class="achievement-desc">Прочитай 90 страниц книги по логике</div>
         </div>
       </div>
     </section>
@@ -153,7 +193,10 @@
       <h2 class="section-title">📚 Военные знания</h2>
       <div class="military-tabs">
         <button class="tab-btn active" data-tab="structure">Структура ВС РФ</button>
-        <button class="tab-btn" data-tab="ak47">Устройство АК-47</button>
+        <button class="tab-btn" data-tab="tactics">Тактика и стратегия</button>
+        <button class="tab-btn" data-tab="ranks_mil">Звания</button>
+        <button class="tab-btn" data-tab="ak47">АК-47</button>
+        <button class="tab-btn" data-tab="charter">Устав</button>
       </div>
       <div class="military-content">
         <div class="tab-content active" id="tab-structure">
@@ -166,7 +209,34 @@
               <li><strong>Ракетные войска стратегического назначения (РВСН)</strong></li>
               <li><strong>Воздушно-десантные войска (ВДВ)</strong></li>
             </ul>
-            <button class="btn btn-secondary" id="startStructureTest">Пройти тест</button>
+            <button class="btn btn-secondary" data-test="structure">Пройти тест</button>
+          </div>
+        </div>
+        <div class="tab-content" id="tab-tactics">
+          <div class="military-info">
+            <h3>Тактика и стратегия</h3>
+            <ul>
+              <li><strong>Тактика</strong> — подготовка и ведение боя подразделениями. Виды: наступление, оборона, встречный бой</li>
+              <li><strong>Стратегия</strong> — искусство ведения войны в целом, планирование кампаний</li>
+              <li><strong>Оперативное искусство</strong> — связующее звено между тактикой и стратегией</li>
+              <li><strong>Бой</strong> — организованные удары и манёвр с целью уничтожения противника</li>
+              <li><strong>Оборона</strong> — вид боевых действий с целью отражения наступления</li>
+            </ul>
+            <button class="btn btn-secondary" data-test="tactics">Пройти тест</button>
+          </div>
+        </div>
+        <div class="tab-content" id="tab-ranks_mil">
+          <div class="military-info">
+            <h3>Воинские звания ВС РФ</h3>
+            <ul>
+              <li><strong>Солдаты:</strong> Рядовой, Ефрейтор</li>
+              <li><strong>Сержанты:</strong> Мл. сержант, Сержант, Ст. сержант, Старшина</li>
+              <li><strong>Прапорщики:</strong> Прапорщик, Ст. прапорщик</li>
+              <li><strong>Мл. офицеры:</strong> Мл. лейтенант, Лейтенант, Ст. лейтенант, Капитан</li>
+              <li><strong>Ст. офицеры:</strong> Майор, Подполковник, Полковник</li>
+              <li><strong>Генералы:</strong> Генерал-майор, Генерал-лейтенант, Генерал-полковник, Генерал армии</li>
+            </ul>
+            <button class="btn btn-secondary" data-test="ranks_mil">Пройти тест</button>
           </div>
         </div>
         <div class="tab-content" id="tab-ak47">
@@ -178,9 +248,21 @@
               <li><strong>Затвор</strong> — запирает канал ствола при выстреле</li>
               <li><strong>Магазин</strong> — на 30 патронов 7,62×39 мм</li>
               <li><strong>Приклад</strong> — деревянный или складной</li>
-              <li><strong>Ударно-спусковой механизм</strong> — одиночный и автоматический огонь</li>
+              <li><strong>УСМ</strong> — одиночный и автоматический огонь</li>
             </ul>
-            <button class="btn btn-secondary" id="startAK47Test">Пройти тест</button>
+            <button class="btn btn-secondary" data-test="ak47">Пройти тест</button>
+          </div>
+        </div>
+        <div class="tab-content" id="tab-charter">
+          <div class="military-info">
+            <h3>Устав ВС РФ — основы</h3>
+            <ul>
+              <li><strong>Устав внутренней службы</strong> — права и обязанности военнослужащих</li>
+              <li><strong>Дисциплинарный устав</strong> — поддержание воинской дисциплины</li>
+              <li><strong>Строевой устав</strong> — построения, движения, воинское приветствие</li>
+              <li><strong>Устав гарнизонной службы</strong> — несение службы в гарнизоне</li>
+            </ul>
+            <button class="btn btn-secondary" data-test="charter">Пройти тест</button>
           </div>
         </div>
       </div>

@@ -1,4 +1,6 @@
-// ========== ДАННЫЕ ==========
+// ========== КОНСТАНТЫ ==========
+
+const ACHIEVEMENT_XP = 25;
 
 const RANKS = [
   { id: 'ryadovoy', name: 'Рядовой', xp: 0, order: 0 },
@@ -23,9 +25,21 @@ const RANKS = [
   { id: 'marshal', name: 'Маршал РФ', xp: 30000, order: 19 }
 ];
 
+const GOAL_TEMPLATES = [
+  {
+    id: 'logic_book',
+    name: 'Прочитать книгу по логике',
+    dailyTask: '3 стр по логике',
+    dailyXP: 10,
+    questTarget: 90,
+    perTask: 3,
+    questId: 'read_logic'
+  }
+];
+
 const RANK_QUESTS = {
   efreitor: [
-    { id: 'read_logic', name: 'Прочитать книгу по логике', type: 'goal' },
+    { id: 'read_logic', name: 'Прочитать книгу по логике (90 стр)', type: 'goal' },
     { id: 'xp_100', name: 'Набрать 100 XP', type: 'xp' }
   ],
   ml_sergeant: [
@@ -36,13 +50,13 @@ const RANK_QUESTS = {
   sergeant: [
     { id: 'program_10h', name: 'Попрограммировать 10 часов', type: 'custom' },
     { id: 'train_10', name: 'Потренироваться 10 раз', type: 'custom' },
-    { id: 'military_test', name: 'Пройди тест по структуре ВС РФ', type: 'test' },
+    { id: 'military_test', name: 'Тест: структура ВС РФ', type: 'test' },
     { id: 'xp_500', name: 'Набрать 500 XP', type: 'xp' }
   ],
   st_sergeant: [
     { id: 'program_20h', name: 'Попрограммировать 20 часов', type: 'custom' },
     { id: 'train_20', name: 'Потренироваться 20 раз', type: 'custom' },
-    { id: 'ak47_test', name: 'Пройди тест по АК-47', type: 'test' },
+    { id: 'ak47_test', name: 'Тест: АК-47', type: 'test' },
     { id: 'xp_800', name: 'Набрать 800 XP', type: 'xp' }
   ]
 };
@@ -51,44 +65,50 @@ const TESTS = {
   structure: {
     title: 'Структура ВС РФ',
     questions: [
-      { q: 'Какие виды войск входят в ВС РФ?', a: 'СВ, ВКС, ВМФ, РВСН, ВДВ', options: [
-        'Только СВ и ВМФ',
-        'СВ, ВКС, ВМФ, РВСН, ВДВ',
-        'СВ, ВМФ и полиция'
-      ], correct: 1 },
-      { q: 'Что означает аббревиатура РВСН?', a: 'Ракетные войска стратегического назначения', options: [
-        'Ракетные войска стратегического назначения',
-        'Разведывательные войска',
-        'Регулярные войска'
-      ], correct: 0 },
-      { q: 'Что означает аббревиатура ВДВ?', a: 'Воздушно-десантные войска', options: [
-        'Военно-десантные войска',
-        'Воздушно-десантные войска',
-        'Воздушные войска'
-      ], correct: 1 }
+      { q: 'Какие виды войск входят в ВС РФ?', options: ['Только СВ и ВМФ', 'СВ, ВКС, ВМФ, РВСН, ВДВ', 'СВ, ВМФ и полиция'], correct: 1 },
+      { q: 'Что означает РВСН?', options: ['Ракетные войска стратегического назначения', 'Разведывательные войска', 'Регулярные войска'], correct: 0 },
+      { q: 'Что означает ВДВ?', options: ['Военно-десантные войска', 'Воздушно-десантные войска', 'Воздушные войска'], correct: 1 },
+      { q: 'Какой вид войск отвечает за авиацию и ПВО?', options: ['СВ', 'ВКС', 'ВМФ'], correct: 1 }
+    ]
+  },
+  tactics: {
+    title: 'Тактика и стратегия',
+    questions: [
+      { q: 'Что изучает тактика?', options: ['Ведение войны в целом', 'Подготовку и ведение боя подразделениями', 'Политику государства'], correct: 1 },
+      { q: 'Какие виды боевых действий включает тактика?', options: ['Только оборону', 'Наступление, оборону, встречный бой', 'Только наступление'], correct: 1 },
+      { q: 'Что такое стратегия?', options: ['Ведение отдельного боя', 'Искусство ведения войны в целом', 'Строевая подготовка'], correct: 1 },
+      { q: 'Что связывает тактику и стратегию?', options: ['Дисциплинарный устав', 'Оперативное искусство', 'Строевой устав'], correct: 1 }
+    ]
+  },
+  ranks_mil: {
+    title: 'Воинские звания',
+    questions: [
+      { q: 'Какое звание выше?', options: ['Ефрейтор', 'Рядовой', 'Одинаковые'], correct: 0 },
+      { q: 'Кто относится к младшим офицерам?', options: ['Сержант', 'Лейтенант', 'Прапорщик'], correct: 1 },
+      { q: 'Какое звание старше: майор или подполковник?', options: ['Майор', 'Подполковник', 'Одинаковые'], correct: 1 },
+      { q: 'Высшее войсковое звание в РФ?', options: ['Генерал армии', 'Маршал РФ', 'Генерал-полковник'], correct: 1 }
     ]
   },
   ak47: {
     title: 'Устройство АК-47',
     questions: [
-      { q: 'Какой калибр патронов у АК-47?', a: '7,62×39 мм', options: [
-        '5,45×39 мм',
-        '7,62×39 мм',
-        '9×18 мм'
-      ], correct: 1 },
-      { q: 'Ёмкость стандартного магазина АК-47?', a: '30 патронов', options: [
-        '20 патронов',
-        '30 патронов',
-        '40 патронов'
-      ], correct: 1 },
-      { q: 'Какая деталь запирает канал ствола при выстреле?', a: 'Затвор', options: [
-        'Затворная рама',
-        'Затвор',
-        'УСМ'
-      ], correct: 1 }
+      { q: 'Калибр патронов АК-47?', options: ['5,45×39 мм', '7,62×39 мм', '9×18 мм'], correct: 1 },
+      { q: 'Ёмкость стандартного магазина?', options: ['20 патронов', '30 патронов', '40 патронов'], correct: 1 },
+      { q: 'Что запирает канал ствола при выстреле?', options: ['Затворная рама', 'Затвор', 'УСМ'], correct: 1 },
+      { q: 'Что означает УСМ?', options: ['Устройство снаряжения магазина', 'Ударно-спусковой механизм', 'Узел смазки'], correct: 1 }
+    ]
+  },
+  charter: {
+    title: 'Устав ВС РФ',
+    questions: [
+      { q: 'Какой устав определяет права военнослужащих?', options: ['Строевой', 'Внутренней службы', 'Гарнизонной'], correct: 1 },
+      { q: 'Какой устав регулирует воинское приветствие?', options: ['Дисциплинарный', 'Строевой', 'Внутренней службы'], correct: 1 },
+      { q: 'Что регулирует дисциплинарный устав?', options: ['Построения', 'Воинскую дисциплину', 'Гарнизонную службу'], correct: 1 }
     ]
   }
 };
+
+const ALL_TEST_IDS = ['structure', 'tactics', 'ranks_mil', 'ak47', 'charter'];
 
 // ========== СОСТОЯНИЕ ==========
 
@@ -97,15 +117,15 @@ let state = {
   currentRankIndex: 0,
   goals: [],
   tasks: [],
-  completedTasks: [],
   achievements: [],
   questProgress: {
     read_logic: false,
     program_5h: false, program_10h: false, program_20h: false,
     train_5: false, train_10: false, train_20: false,
-    military_test: false,
-    ak47_test: false
+    military_test: false, tactics_test: false, ranks_test: false,
+    ak47_test: false, charter_test: false
   },
+  testsPassed: {},
   programHours: 0,
   trainCount: 0,
   streakDays: 0,
@@ -124,6 +144,21 @@ function loadState() {
 
 function saveState() {
   localStorage.setItem('champion_state', JSON.stringify(state));
+}
+
+// ========== КВЕСТЫ: пересчёт из целей (исправление бага) ==========
+
+function updateQuestProgressFromGoals() {
+  state.questProgress.read_logic = false;
+  state.goals.forEach(g => {
+    if (g.done && (g.templateId === 'logic_book' || (g.text && (g.text.toLowerCase().includes('логик') || g.text.toLowerCase().includes('логике'))))) {
+      if (g.templateId === 'logic_book') {
+        state.questProgress.read_logic = (g.currentValue || 0) >= (g.questTarget || 90);
+      } else {
+        state.questProgress.read_logic = true;
+      }
+    }
+  });
 }
 
 // ========== РЕНДЕРИНГ ==========
@@ -147,7 +182,6 @@ function renderCharacter() {
     document.getElementById('xpToNext').textContent = 'Максимальное звание!';
   }
   
-  // Погоны в зависимости от звания
   updateShoulderStraps(rank.order);
   document.getElementById('rankBadge').textContent = rank.name.split(' ')[0];
 }
@@ -161,9 +195,11 @@ function updateShoulderStraps(rankOrder) {
 
 function renderAchievements() {
   const grid = document.getElementById('achievementsGrid');
-  const achievementIds = ['first_task', 'efreitor', 'sergeant', 'logic_book', 'programming', 'fitness', 'military_test', 'ak47', 'week_streak'];
+  const allIds = ['first_task', 'efreitor', 'sergeant', 'starshina', 'praporshik', 'officer_career', 'captain', 'major',
+    'logic_book', 'logic_pages', 'programming', 'fitness', 'military_test', 'ak47', 'all_tests',
+    'week_streak', 'month_streak'];
   
-  achievementIds.forEach(id => {
+  allIds.forEach(id => {
     const el = grid.querySelector(`[data-id="${id}"]`);
     if (el && state.achievements.includes(id)) {
       el.classList.add('unlocked');
@@ -175,22 +211,23 @@ function renderAchievements() {
 
 function renderGoals() {
   const list = document.getElementById('goalsList');
-  list.innerHTML = state.goals.map((g, i) => `
+  list.innerHTML = state.goals.map((g, i) => {
+    const progress = g.templateId ? ` (${g.currentValue || 0}/${g.questTarget || 90})` : '';
+    return `
     <div class="goal-item ${g.done ? 'done' : ''}" data-index="${i}">
-      <div class="goal-check ${g.done ? 'checked' : ''}" data-index="${i}"></div>
-      <span class="goal-text">${escapeHtml(g.text)}</span>
+      <div class="goal-check ${g.done ? 'checked' : ''}" data-index="${i}" data-toggle></div>
+      <span class="goal-text">${escapeHtml(g.text)}${progress}</span>
       <button class="delete-btn goal-delete" data-index="${i}">×</button>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 function renderTasks() {
   const list = document.getElementById('tasksList');
-  const today = new Date().toDateString();
-  
   list.innerHTML = state.tasks.map((t, i) => `
     <div class="task-item ${t.done ? 'done' : ''}" data-index="${i}">
-      <div class="task-check ${t.done ? 'checked' : ''}" data-index="${i}"></div>
+      <div class="task-check ${t.done ? 'checked' : ''}" data-index="${i}" data-toggle></div>
       <span class="task-text">${escapeHtml(t.text)}</span>
       <span class="task-xp">+${t.xp} XP</span>
       <button class="delete-btn task-delete" data-index="${i}">×</button>
@@ -222,9 +259,7 @@ function renderQuests() {
     return;
   }
   
-  const quests = RANK_QUESTS[nextRank.id] || [
-    { id: 'xp', name: `Набрать ${nextRank.xp} XP`, type: 'xp' }
-  ];
+  const quests = RANK_QUESTS[nextRank.id] || [{ id: 'xp', name: `Набрать ${nextRank.xp} XP`, type: 'xp' }];
   
   const getReqStatus = (q) => {
     if (q.type === 'xp') return state.totalXP >= nextRank.xp;
@@ -269,6 +304,13 @@ function addXP(amount) {
   saveState();
 }
 
+function unlockAchievement(id) {
+  if (!state.achievements.includes(id)) {
+    state.achievements.push(id);
+    addXP(ACHIEVEMENT_XP);
+  }
+}
+
 function checkRankUp() {
   for (let i = RANKS.length - 1; i >= 0; i--) {
     if (state.totalXP >= RANKS[i].xp) {
@@ -279,24 +321,51 @@ function checkRankUp() {
 }
 
 function checkAchievements() {
-  const toAdd = [];
-  if (state.totalXP > 0 && !state.achievements.includes('first_task')) toAdd.push('first_task');
-  if (state.currentRankIndex >= 1 && !state.achievements.includes('efreitor')) toAdd.push('efreitor');
-  if (state.currentRankIndex >= 3 && !state.achievements.includes('sergeant')) toAdd.push('sergeant');
-  if (state.questProgress.read_logic && !state.achievements.includes('logic_book')) toAdd.push('logic_book');
-  if (state.programHours >= 10 && !state.achievements.includes('programming')) toAdd.push('programming');
-  if (state.trainCount >= 20 && !state.achievements.includes('fitness')) toAdd.push('fitness');
-  if (state.questProgress.military_test && !state.achievements.includes('military_test')) toAdd.push('military_test');
-  if (state.questProgress.ak47_test && !state.achievements.includes('ak47')) toAdd.push('ak47');
-  if (state.streakDays >= 7 && !state.achievements.includes('week_streak')) toAdd.push('week_streak');
-  state.achievements.push(...toAdd);
+  if (state.totalXP > 0) unlockAchievement('first_task');
+  if (state.currentRankIndex >= 1) unlockAchievement('efreitor');
+  if (state.currentRankIndex >= 3) unlockAchievement('sergeant');
+  if (state.currentRankIndex >= 4) unlockAchievement('starshina');
+  if (state.currentRankIndex >= 6) unlockAchievement('praporshik');
+  if (state.currentRankIndex >= 8) unlockAchievement('officer_career');
+  if (state.currentRankIndex >= 11) unlockAchievement('captain');
+  if (state.currentRankIndex >= 12) unlockAchievement('major');
+  if (state.questProgress.read_logic) unlockAchievement('logic_book');
+  if (getLogicPagesRead() >= 90) unlockAchievement('logic_pages');
+  if (state.programHours >= 10) unlockAchievement('programming');
+  if (state.trainCount >= 20) unlockAchievement('fitness');
+  if (state.questProgress.military_test) unlockAchievement('military_test');
+  if (state.questProgress.ak47_test) unlockAchievement('ak47');
+  if (state.streakDays >= 7) unlockAchievement('week_streak');
+  if (state.streakDays >= 30) unlockAchievement('month_streak');
+  if (ALL_TEST_IDS.every(id => state.questProgress[TEST_TO_QUEST[id]] || state.testsPassed[id])) unlockAchievement('all_tests');
+}
+
+function getLogicPagesRead() {
+  const goal = state.goals.find(g => g.templateId === 'logic_book');
+  return goal ? (goal.currentValue || 0) : 0;
 }
 
 function completeTask(index) {
   const task = state.tasks[index];
-  if (!task || task.done) return;
+  if (!task) return;
+  if (task.done) {
+    uncompleteTask(index);
+    return;
+  }
   task.done = true;
   addXP(task.xp);
+  
+  if (task.goalId) {
+    const goal = state.goals.find(g => g.id === task.goalId);
+    if (goal) {
+      goal.currentValue = (goal.currentValue || 0) + (goal.perTask || 1);
+      if (goal.currentValue >= (goal.questTarget || 90)) {
+        goal.done = true;
+      }
+      updateQuestProgressFromGoals();
+      checkAchievements();
+    }
+  }
   
   const today = new Date().toDateString();
   if (state.lastTaskDate) {
@@ -314,21 +383,73 @@ function completeTask(index) {
   saveState();
 }
 
+function uncompleteTask(index) {
+  const task = state.tasks[index];
+  if (!task || !task.done) return;
+  task.done = false;
+  if (task.goalId) {
+    const goal = state.goals.find(g => g.id === task.goalId);
+    if (goal) {
+      goal.currentValue = Math.max(0, (goal.currentValue || 0) - (goal.perTask || 1));
+      if (goal.currentValue < (goal.questTarget || 90)) {
+        goal.done = false;
+      }
+      updateQuestProgressFromGoals();
+    }
+  }
+  saveState();
+}
+
+function toggleGoal(index) {
+  const goal = state.goals[index];
+  if (!goal) return;
+  
+  if (goal.done) {
+    goal.done = false;
+    updateQuestProgressFromGoals();
+    checkAchievements();
+  } else {
+    if (goal.templateId && goal.questTarget) {
+      if ((goal.currentValue || 0) >= goal.questTarget) {
+        goal.done = true;
+      } else {
+        return;
+      }
+    } else {
+      goal.done = true;
+    }
+    const text = (goal.text || '').toLowerCase();
+    if (text.includes('логик') || text.includes('логике') || goal.templateId === 'logic_book') {
+      updateQuestProgressFromGoals();
+    }
+    checkAchievements();
+  }
+  saveState();
+}
+
 function completeGoal(index) {
   const goal = state.goals[index];
-  if (!goal || goal.done) return;
-  goal.done = true;
-  
-  const text = goal.text.toLowerCase();
-  if (text.includes('логик') || text.includes('логике')) {
-    state.questProgress.read_logic = true;
-  }
-  
+  if (!goal) return;
+  toggleGoal(index);
+}
+
+function uncompleteGoal(index) {
+  const goal = state.goals[index];
+  if (!goal) return;
+  goal.done = false;
+  updateQuestProgressFromGoals();
   saveState();
-  checkAchievements();
 }
 
 // ========== ТЕСТЫ ==========
+
+const TEST_TO_QUEST = {
+  structure: 'military_test',
+  tactics: 'tactics_test',
+  ranks_mil: 'ranks_test',
+  ak47: 'ak47_test',
+  charter: 'charter_test'
+};
 
 function showTest(testId) {
   const test = TESTS[testId];
@@ -359,8 +480,9 @@ function submitTest(testId) {
   });
   
   if (correct === test.questions.length) {
-    if (testId === 'structure') state.questProgress.military_test = true;
-    if (testId === 'ak47') state.questProgress.ak47_test = true;
+    const questKey = TEST_TO_QUEST[testId] || testId + '_test';
+    state.questProgress[questKey] = true;
+    state.testsPassed[testId] = true;
     addXP(50);
     alert('Тест пройден! +50 XP');
   } else {
@@ -387,12 +509,27 @@ function renderAll() {
 document.getElementById('addGoalBtn').addEventListener('click', () => {
   const input = document.getElementById('goalInput');
   const text = input.value.trim();
-  if (text) {
+  if (!text) return;
+  
+  const template = GOAL_TEMPLATES.find(t => text.toLowerCase().includes('логик'));
+  if (template) {
+    const id = 'goal_' + Date.now();
+    state.goals.push({
+      id, text: template.name, done: false,
+      templateId: template.id, questTarget: template.questTarget,
+      currentValue: 0, perTask: template.perTask
+    });
+    state.tasks.push({
+      text: template.dailyTask, xp: template.dailyXP, done: false,
+      goalId: id
+    });
+  } else {
     state.goals.push({ text, done: false });
-    input.value = '';
-    saveState();
-    renderGoals();
   }
+  input.value = '';
+  saveState();
+  renderGoals();
+  renderTasks();
 });
 
 document.getElementById('addTaskBtn').addEventListener('click', () => {
@@ -410,21 +547,33 @@ document.getElementById('addTaskBtn').addEventListener('click', () => {
 });
 
 document.getElementById('goalsList').addEventListener('click', (e) => {
-  const check = e.target.closest('.goal-check');
+  const check = e.target.closest('.goal-check[data-toggle]');
   const del = e.target.closest('.goal-delete');
   if (check) {
-    completeGoal(parseInt(check.dataset.index));
+    const idx = parseInt(check.dataset.index);
+    const goal = state.goals[idx];
+    if (goal.done) {
+      uncompleteGoal(idx);
+    } else {
+      toggleGoal(idx);
+    }
     renderAll();
   }
   if (del) {
-    state.goals.splice(parseInt(del.dataset.index), 1);
+    const idx = parseInt(del.dataset.index);
+    const goal = state.goals[idx];
+    if (goal?.templateId) {
+      state.tasks = state.tasks.filter(t => t.goalId !== goal.id);
+    }
+    state.goals.splice(idx, 1);
     saveState();
     renderGoals();
+    renderTasks();
   }
 });
 
 document.getElementById('tasksList').addEventListener('click', (e) => {
-  const check = e.target.closest('.task-check');
+  const check = e.target.closest('.task-check[data-toggle]');
   const del = e.target.closest('.task-delete');
   if (check) {
     completeTask(parseInt(check.dataset.index));
@@ -437,8 +586,10 @@ document.getElementById('tasksList').addEventListener('click', (e) => {
   }
 });
 
-document.getElementById('startStructureTest').addEventListener('click', () => showTest('structure'));
-document.getElementById('startAK47Test').addEventListener('click', () => showTest('ak47'));
+document.getElementById('military').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-test]');
+  if (btn) showTest(btn.dataset.test);
+});
 
 document.getElementById('closeTest').addEventListener('click', () => {
   document.getElementById('testModal').classList.remove('active');
@@ -449,11 +600,12 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
-    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    const tabId = btn.dataset.tab;
+    const tabEl = document.getElementById('tab-' + tabId);
+    if (tabEl) tabEl.classList.add('active');
   });
 });
 
-// Добавление часов программирования и тренировок
 document.addEventListener('DOMContentLoaded', () => {
   renderAll();
   
@@ -475,7 +627,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 loadState();
 
-// Дефолтные задачи если пусто
 if (state.tasks.length === 0) {
   state.tasks = [
     { text: 'Утренняя зарядка', xp: 10, done: false },
@@ -486,7 +637,6 @@ if (state.tasks.length === 0) {
 
 renderAll();
 
-// Плавная прокрутка
 document.querySelectorAll('.nav-link').forEach(link => {
   link.addEventListener('click', e => {
     e.preventDefault();
