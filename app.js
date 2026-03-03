@@ -171,6 +171,7 @@ let state = {
   goals: [],
   tasks: [],
   achievements: [],
+  lastTaskResetDate: null,
   questProgress: {
     read_logic: false,
     program_5h: false, program_10h: false, program_20h: false,
@@ -196,6 +197,16 @@ function loadState() {
   }
   updateQuestProgressFromGoals();
   recalculateRank();
+  resetDailyTasksIfNeeded();
+}
+
+function resetDailyTasksIfNeeded() {
+  const today = new Date().toDateString();
+  if (state.lastTaskResetDate !== today) {
+    state.tasks.forEach(t => { t.done = false; });
+    state.lastTaskResetDate = today;
+    saveState();
+  }
 }
 
 function saveState() {
@@ -247,10 +258,32 @@ function renderCharacter() {
 }
 
 function updateShoulderStraps(rankOrder) {
-  const straps = document.querySelectorAll('.strap');
-  straps.forEach(strap => {
-    strap.style.background = rankOrder < 5 ? '#4a3728' : rankOrder < 12 ? '#2d3a2d' : '#3d3520';
+  const insigniaContainers = document.querySelectorAll('.strap-insignia');
+  const [html, layout] = getRankInsigniaHTML(rankOrder);
+  insigniaContainers.forEach(container => {
+    container.className = 'strap-insignia ' + layout;
+    container.innerHTML = html;
   });
+  document.querySelectorAll('.strap').forEach(strap => {
+    strap.style.background = rankOrder < 6 ? '#4a3728' : rankOrder < 12 ? '#2d3a2d' : '#3d3520';
+  });
+}
+
+function getRankInsigniaHTML(rankOrder) {
+  const star = (cls = '') => `<span class="insignia-star ${cls}">★</span>`;
+  const stripe = '<span class="insignia-stripe"></span>';
+  const stripeWide = '<span class="insignia-stripe wide"></span>';
+  if (rankOrder === 0) return ['', 'empty'];
+  if (rankOrder === 1) return [stripe, 'stripes'];
+  if (rankOrder === 2) return [stripe + stripe, 'stripes'];
+  if (rankOrder === 3) return [stripe + stripe + stripe, 'stripes'];
+  if (rankOrder === 4) return [stripeWide, 'stripes'];
+  if (rankOrder === 5) return [stripeWide + stripe, 'stripes'];
+  if (rankOrder === 6) return [star() + star(), 'stars'];
+  if (rankOrder === 7) return [star() + star() + star(), 'stars'];
+  if (rankOrder >= 8 && rankOrder <= 11) return [Array(rankOrder - 7).fill(0).map(() => star()).join(''), 'stars'];
+  if (rankOrder >= 12 && rankOrder <= 14) return [Array(rankOrder - 11).fill(0).map(() => star('big')).join(''), 'stars'];
+  return [star('marshal'), 'stars'];
 }
 
 function renderAchievements() {
