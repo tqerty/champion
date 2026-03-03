@@ -126,10 +126,42 @@ const TESTS = {
       { q: 'Какой устав регулирует воинское приветствие?', options: ['Дисциплинарный', 'Строевой', 'Внутренней службы'], correct: 1 },
       { q: 'Что регулирует дисциплинарный устав?', options: ['Построения', 'Воинскую дисциплину', 'Гарнизонную службу'], correct: 1 }
     ]
+  },
+  oath: {
+    title: 'Военная присяга',
+    questions: [
+      { q: 'Перед чем приносится военная присяга?', options: ['Перед командиром', 'Перед Государственным флагом РФ и Боевым Знаменем', 'Перед строем'], correct: 1 },
+      { q: 'Что клянётся соблюдать военнослужащий в присяге?', options: ['Только приказы', 'Конституцию РФ и воинские уставы', 'Только уставы'], correct: 1 },
+      { q: 'Что защищает военнослужащий по присяге?', options: ['Только границы', 'Свободу, независимость и конституционный строй России', 'Только командиров'], correct: 1 }
+    ]
+  },
+  duties: {
+    title: 'Обязанности рядового',
+    questions: [
+      { q: 'Что обязан выполнять рядовой?', options: ['Только приказы', 'Требования воинских уставов и приказы командиров', 'Только уставы'], correct: 1 },
+      { q: 'Чему должен быть верен военнослужащий?', options: ['Только командиру', 'Военной присяге', 'Только части'], correct: 1 },
+      { q: 'Что должен дорожить военнослужащий?', options: ['Только оружием', 'Честью и боевой славой', 'Только формой'], correct: 1 }
+    ]
+  },
+  symbols: {
+    title: 'Символы и ритуалы',
+    questions: [
+      { q: 'Что такое Боевое Знамя?', options: ['Флаг части', 'Символ воинской части, чести и доблести', 'Награда'], correct: 1 },
+      { q: 'Когда исполняется Гимн РФ?', options: ['Каждый день', 'При торжественных церемониях', 'Только на параде'], correct: 1 },
+      { q: 'Какой день — День Победы?', options: ['22 июня', '9 мая', '7 ноября'], correct: 1 }
+    ]
+  },
+  drill: {
+    title: 'Строевая подготовка',
+    questions: [
+      { q: 'Что такое строй?', options: ['Марш', 'Установленное размещение военнослужащих для совместных действий', 'Команда'], correct: 1 },
+      { q: 'Что такое шеренга?', options: ['Колонна', 'Строй, в котором военнослужащие на одной линии', 'Ряд'], correct: 1 },
+      { q: 'На какую высоту выносится нога при строевом шаге?', options: ['5–10 см', '15–20 см', '25–30 см'], correct: 1 }
+    ]
   }
 };
 
-const ALL_TEST_IDS = ['structure', 'tactics', 'ranks_mil', 'ak47', 'charter'];
+const ALL_TEST_IDS = ['structure', 'tactics', 'ranks_mil', 'ak47', 'charter', 'oath', 'duties', 'symbols', 'drill'];
 
 // ========== СОСТОЯНИЕ ==========
 
@@ -144,7 +176,8 @@ let state = {
     program_5h: false, program_10h: false, program_20h: false,
     train_5: false, train_10: false, train_20: false,
     military_test: false, tactics_test: false, ranks_test: false,
-    ak47_test: false, charter_test: false
+    ak47_test: false, charter_test: false,
+    oath_test: false, duties_test: false, symbols_test: false, drill_test: false
   },
   testsPassed: {},
   programHours: 0,
@@ -161,6 +194,8 @@ function loadState() {
     const parsed = JSON.parse(saved);
     state = { ...state, ...parsed };
   }
+  updateQuestProgressFromGoals();
+  recalculateRank();
 }
 
 function saveState() {
@@ -367,18 +402,23 @@ function allQuestsCompletedForRank(rankIndex) {
   return quests.every(getReqStatus);
 }
 
-function checkRankUp() {
-  let newRankIndex = state.currentRankIndex;
+function recalculateRank() {
+  let newRankIndex = 0;
   for (let i = RANKS.length - 1; i >= 0; i--) {
     if (state.totalXP >= RANKS[i].xp && allQuestsCompletedForRank(i)) {
       newRankIndex = i;
       break;
     }
   }
-  if (newRankIndex > state.currentRankIndex) {
-    showRankUpAnimation(RANKS[newRankIndex]);
-  }
   state.currentRankIndex = newRankIndex;
+}
+
+function checkRankUp() {
+  const oldRankIndex = state.currentRankIndex;
+  recalculateRank();
+  if (state.currentRankIndex > oldRankIndex) {
+    showRankUpAnimation(RANKS[state.currentRankIndex]);
+  }
 }
 
 function showRankUpAnimation(rank) {
@@ -518,7 +558,11 @@ const TEST_TO_QUEST = {
   tactics: 'tactics_test',
   ranks_mil: 'ranks_test',
   ak47: 'ak47_test',
-  charter: 'charter_test'
+  charter: 'charter_test',
+  oath: 'oath_test',
+  duties: 'duties_test',
+  symbols: 'symbols_test',
+  drill: 'drill_test'
 };
 
 function showTest(testId) {
