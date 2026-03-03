@@ -58,7 +58,28 @@ const RANK_QUESTS = {
     { id: 'train_20', name: 'Потренироваться 20 раз', type: 'custom' },
     { id: 'ak47_test', name: 'Тест: АК-47', type: 'test' },
     { id: 'xp_800', name: 'Набрать 800 XP', type: 'xp' }
-  ]
+  ],
+  starshina: [{ id: 'xp_1200', name: 'Набрать 1200 XP', type: 'xp' }],
+  praporshik: [{ id: 'xp_1700', name: 'Набрать 1700 XP', type: 'xp' }],
+  st_praporshik: [{ id: 'xp_2300', name: 'Набрать 2300 XP', type: 'xp' }],
+  ml_lieutenant: [
+    { id: 'tactics_test', name: 'Тест: тактика и стратегия', type: 'test' },
+    { id: 'xp_3000', name: 'Набрать 3000 XP', type: 'xp' }
+  ],
+  lieutenant: [{ id: 'xp_4000', name: 'Набрать 4000 XP', type: 'xp' }],
+  st_lieutenant: [
+    { id: 'ranks_test', name: 'Тест: воинские звания', type: 'test' },
+    { id: 'xp_5200', name: 'Набрать 5200 XP', type: 'xp' }
+  ],
+  captain: [{ id: 'xp_6600', name: 'Набрать 6600 XP', type: 'xp' }],
+  major: [{ id: 'charter_test', name: 'Тест: устав ВС РФ', type: 'test' }, { id: 'xp_8200', name: 'Набрать 8200 XP', type: 'xp' }],
+  podpolkovnik: [{ id: 'xp_10000', name: 'Набрать 10000 XP', type: 'xp' }],
+  polkovnik: [{ id: 'xp_12000', name: 'Набрать 12000 XP', type: 'xp' }],
+  gen_major: [{ id: 'xp_14500', name: 'Набрать 14500 XP', type: 'xp' }],
+  gen_lieutenant: [{ id: 'xp_17500', name: 'Набрать 17500 XP', type: 'xp' }],
+  gen_polkovnik: [{ id: 'xp_21000', name: 'Набрать 21000 XP', type: 'xp' }],
+  gen_armii: [{ id: 'xp_25000', name: 'Набрать 25000 XP', type: 'xp' }],
+  marshal: [{ id: 'xp_30000', name: 'Набрать 30000 XP', type: 'xp' }]
 };
 
 const TESTS = {
@@ -176,7 +197,11 @@ function renderCharacter() {
     const xpNeeded = nextRank.xp - rank.xp;
     const percent = Math.min(100, (xpInRank / xpNeeded) * 100);
     document.getElementById('xpFill').style.width = percent + '%';
-    document.getElementById('xpToNext').textContent = `До ${nextRank.name}: ${nextRank.xp - state.totalXP} XP`;
+    const questsDone = allQuestsCompletedForRank(state.currentRankIndex + 1);
+    const xpEnough = state.totalXP >= nextRank.xp;
+    document.getElementById('xpToNext').textContent = xpEnough && !questsDone
+      ? `До ${nextRank.name}: выполни квесты!`
+      : `До ${nextRank.name}: ${Math.max(0, nextRank.xp - state.totalXP)} XP`;
   } else {
     document.getElementById('xpFill').style.width = '100%';
     document.getElementById('xpToNext').textContent = 'Максимальное звание!';
@@ -238,13 +263,16 @@ function renderTasks() {
 function renderRanks() {
   const container = document.getElementById('ranksProgress');
   container.innerHTML = RANKS.map((r, i) => {
-    const unlocked = state.totalXP >= r.xp;
+    const hasXP = state.totalXP >= r.xp;
+    const questsDone = allQuestsCompletedForRank(i);
+    const unlocked = hasXP && questsDone;
     const current = i === state.currentRankIndex;
+    const blocked = hasXP && !questsDone ? ' blocked' : '';
     return `
-      <div class="rank-item ${unlocked ? 'unlocked' : ''} ${current ? 'current' : ''}">
+      <div class="rank-item ${unlocked ? 'unlocked' : ''} ${current ? 'current' : ''}${blocked}">
         <div class="rank-number">${i + 1}</div>
         <div class="rank-name">${r.name}</div>
-        <div class="rank-req">${r.xp} XP</div>
+        <div class="rank-req">${r.xp} XP${!questsDone && hasXP ? ' (выполни квесты!)' : ''}</div>
       </div>
     `;
   }).join('');
@@ -276,9 +304,15 @@ function renderQuests() {
     return false;
   };
   
+  const doneCount = quests.filter(getReqStatus).length;
+  const questPercent = Math.round((doneCount / quests.length) * 100);
   container.innerHTML = `
     <div class="quest-card">
       <h3 class="quest-title">Квесты для звания: ${nextRank.name}</h3>
+      <div class="quest-progress-bar">
+        <div class="quest-progress-fill" style="width: ${questPercent}%"></div>
+      </div>
+      <p class="quest-progress-label">${doneCount} из ${quests.length} квестов</p>
       <div class="quest-requirements">
         ${quests.map(q => `
           <span class="quest-req ${getReqStatus(q) ? 'done' : ''}">${q.name} ${getReqStatus(q) ? '✓' : ''}</span>
@@ -311,13 +345,49 @@ function unlockAchievement(id) {
   }
 }
 
+function allQuestsCompletedForRank(rankIndex) {
+  const rank = RANKS[rankIndex];
+  const quests = RANK_QUESTS[rank.id];
+  if (!quests) return true;
+  const nextRank = rank;
+  const getReqStatus = (q) => {
+    if (q.type === 'xp') return state.totalXP >= rank.xp;
+    if (q.type === 'test') return state.questProgress[q.id];
+    if (q.type === 'custom') {
+      if (q.id === 'program_5h') return state.programHours >= 5;
+      if (q.id === 'program_10h') return state.programHours >= 10;
+      if (q.id === 'program_20h') return state.programHours >= 20;
+      if (q.id === 'train_5') return state.trainCount >= 5;
+      if (q.id === 'train_10') return state.trainCount >= 10;
+      if (q.id === 'train_20') return state.trainCount >= 20;
+    }
+    if (q.type === 'goal') return state.questProgress[q.id];
+    return false;
+  };
+  return quests.every(getReqStatus);
+}
+
 function checkRankUp() {
+  let newRankIndex = state.currentRankIndex;
   for (let i = RANKS.length - 1; i >= 0; i--) {
-    if (state.totalXP >= RANKS[i].xp) {
-      state.currentRankIndex = i;
+    if (state.totalXP >= RANKS[i].xp && allQuestsCompletedForRank(i)) {
+      newRankIndex = i;
       break;
     }
   }
+  if (newRankIndex > state.currentRankIndex) {
+    showRankUpAnimation(RANKS[newRankIndex]);
+  }
+  state.currentRankIndex = newRankIndex;
+}
+
+function showRankUpAnimation(rank) {
+  const overlay = document.getElementById('rankUpOverlay');
+  document.getElementById('rankUpRankName').textContent = rank.name;
+  overlay.classList.add('active');
+  setTimeout(() => {
+    overlay.classList.remove('active');
+  }, 3000);
 }
 
 function checkAchievements() {
