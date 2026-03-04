@@ -441,6 +441,67 @@ body {
 .hall-label { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; }
 .hall-value { font-size: 1.2rem; font-weight: 700; color: var(--gold); }
 
+/* Тренировка солдата */
+.soldier-training-section { background: var(--bg-elevated); border-radius: 16px; padding: 32px; }
+.training-standards { margin-bottom: 24px; }
+.training-standards h3 { color: var(--gold); margin-bottom: 16px; }
+.standards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.std-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.std-icon { font-size: 1.5rem; margin-bottom: 4px; }
+.std-item strong { color: var(--gold); }
+.std-item.passed { border-color: var(--green-accent); background: rgba(61, 122, 53, 0.15); }
+.standards-resistance {
+  padding: 12px 16px;
+  background: rgba(201, 162, 39, 0.1);
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+.standards-resistance h4 { margin-bottom: 8px; color: var(--gold-light); }
+.records-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+.workout-history { font-size: 0.9rem; color: var(--text-muted); }
+.workout-item { padding: 6px 0; border-bottom: 1px solid var(--border); }
+.training-form { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border); }
+.training-form h4 { margin-bottom: 16px; color: var(--gold); }
+.training-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.training-inputs label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+.training-inputs input {
+  padding: 8px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  width: 100%;
+}
+
 .xp-bar-container {
   margin-top: 20px;
 }

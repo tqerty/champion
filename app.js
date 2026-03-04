@@ -305,6 +305,35 @@ const MISSED_DAY_PENALTY = 0.05;
 const DEMOBILIZATION_THRESHOLD = 7;
 const REHAB_DAYS_NEEDED = 3;
 
+// Тренировка солдата: нормативы по званиям (отжимания, приседания, икры/нога 10кг, скручивания, велосипед, книжка)
+const SOLDIER_TRAINING_STANDARDS = [
+  { rank: 0, pushups: 15, squats: 40, calves: 15, crunches: 15, bicycle: 15, book: 8 },
+  { rank: 1, pushups: 25, squats: 60, calves: 20, crunches: 20, bicycle: 20, book: 10 },
+  { rank: 2, pushups: 35, squats: 80, calves: 25, crunches: 25, bicycle: 25, book: 12 },
+  { rank: 3, pushups: 40, squats: 95, calves: 30, crunches: 30, bicycle: 30, book: 15 },
+  { rank: 4, pushups: 50, squats: 100, calves: 30, crunches: 35, bicycle: 35, book: 20 },
+  { rank: 5, pushups: 55, squats: 110, calves: 35, crunches: 40, bicycle: 40, book: 22 },
+  { rank: 6, pushups: 60, squats: 120, calves: 40, crunches: 45, bicycle: 45, book: 25 },
+  { rank: 7, pushups: 65, squats: 130, calves: 45, crunches: 50, bicycle: 50, book: 28 },
+  { rank: 8, pushups: 70, squats: 140, calves: 50, crunches: 55, bicycle: 55, book: 30 },
+  { rank: 9, pushups: 75, squats: 150, calves: 55, crunches: 60, bicycle: 60, book: 32 },
+  { rank: 10, pushups: 80, squats: 160, calves: 60, crunches: 65, bicycle: 65, book: 35 },
+  { rank: 11, pushups: 85, squats: 170, calves: 65, crunches: 70, bicycle: 70, book: 38 },
+  { rank: 12, pushups: 90, squats: 180, calves: 70, crunches: 75, bicycle: 75, book: 40 },
+  { rank: 13, pushups: 95, squats: 190, calves: 75, crunches: 80, bicycle: 80, book: 42 },
+  { rank: 14, pushups: 100, squats: 200, calves: 80, crunches: 85, bicycle: 85, book: 45 },
+  { rank: 15, pushups: 105, squats: 210, calves: 85, crunches: 90, bicycle: 90, book: 48 },
+  { rank: 16, pushups: 110, squats: 220, calves: 90, crunches: 95, bicycle: 95, book: 50 },
+  { rank: 17, pushups: 115, squats: 230, calves: 95, crunches: 100, bicycle: 100, book: 55 },
+  { rank: 18, pushups: 120, squats: 240, calves: 100, crunches: 110, bicycle: 110, book: 60 },
+  { rank: 19, pushups: 130, squats: 250, calves: 110, crunches: 120, bicycle: 120, book: 65 }
+];
+
+const RESISTANCE_BAND_EXERCISES = [
+  { id: 'band_arms', name: 'Резина на руки', resistance: '5–10 кг', desc: 'На каждую руку' },
+  { id: 'band_legs', name: 'Резина на ноги', resistance: '15 кг', desc: 'Приседания, отведения' }
+];
+
 // ========== СОСТОЯНИЕ ==========
 
 let state = {
@@ -342,7 +371,11 @@ let state = {
   hallOfFame: { maxStreak: 0, maxDayXP: 0, fastestRankUp: null },
   dayXP: 0,
   lastRankUpDate: null,
-  titles: []
+  titles: [],
+  soldierTraining: {
+    records: { pushups: 50, squats: 100, calves: 30, crunches: 30, bicycle: 30, book: 15 },
+    workoutHistory: []
+  }
 };
 
 // ========== ИНИЦИАЛИЗАЦИЯ ==========
@@ -769,6 +802,107 @@ function renderHallOfFame() {
       <div class="hall-value">${RANKS[state.currentRankIndex].name}</div>
     </div>
   `;
+}
+
+function renderSoldierTraining() {
+  const rankIdx = state.currentRankIndex;
+  const std = SOLDIER_TRAINING_STANDARDS[Math.min(rankIdx, SOLDIER_TRAINING_STANDARDS.length - 1)];
+  const rec = state.soldierTraining?.records || {};
+  
+  const standardsEl = document.getElementById('trainingStandards');
+  if (standardsEl) {
+    const passed = (key) => (rec[key] || 0) >= std[key];
+    standardsEl.innerHTML = `
+      <h3>Норматив для звания: ${RANKS[rankIdx].name}</h3>
+      <div class="standards-grid">
+        <div class="std-item ${passed('pushups') ? 'passed' : ''}"><span class="std-icon">💪</span><span>Отжимания</span><strong>${std.pushups}</strong> ${passed('pushups') ? '✓' : ''}</div>
+        <div class="std-item ${passed('squats') ? 'passed' : ''}"><span class="std-icon">🦵</span><span>Приседания</span><strong>${std.squats}</strong> ${passed('squats') ? '✓' : ''}</div>
+        <div class="std-item ${passed('calves') ? 'passed' : ''}"><span class="std-icon">🦶</span><span>Икры (10 кг)</span><strong>${std.calves}</strong>/ногу ${passed('calves') ? '✓' : ''}</div>
+        <div class="std-item ${passed('crunches') ? 'passed' : ''}"><span class="std-icon">📦</span><span>Скручивания</span><strong>${std.crunches}</strong> ${passed('crunches') ? '✓' : ''}</div>
+        <div class="std-item ${passed('bicycle') ? 'passed' : ''}"><span class="std-icon">🚴</span><span>Велосипед</span><strong>${std.bicycle}</strong> ${passed('bicycle') ? '✓' : ''}</div>
+        <div class="std-item ${passed('book') ? 'passed' : ''}"><span class="std-icon">📖</span><span>Книжка</span><strong>${std.book}</strong> ${passed('book') ? '✓' : ''}</div>
+      </div>
+      <div class="standards-resistance">
+        <h4>Резина</h4>
+        <p>Руки: 5–10 кг на каждую. Ноги: 15 кг. Добавь повторения в форму ниже.</p>
+      </div>
+    `;
+  }
+  
+  const logEl = document.getElementById('trainingLog');
+  if (logEl) {
+    const myRecords = `
+      <h4>Мои рекорды</h4>
+      <div class="records-grid">
+        <div>Отжимания: <strong>${rec.pushups || 0}</strong> (макс 50, ср. 40)</div>
+        <div>Приседания: <strong>${rec.squats || 0}</strong> (макс 100, ср. 90–95)</div>
+        <div>Икры 10кг: <strong>${rec.calves || 0}</strong>/ногу</div>
+        <div>Скручивания: <strong>${rec.crunches || 0}</strong></div>
+        <div>Велосипед: <strong>${rec.bicycle || 0}</strong></div>
+        <div>Книжка: <strong>${rec.book || 0}</strong></div>
+      </div>
+    `;
+    const history = (state.soldierTraining?.workoutHistory || []).slice(-5).reverse();
+    logEl.innerHTML = myRecords + (history.length ? `
+      <h4>Последние тренировки</h4>
+      <div class="workout-history">
+        ${history.map(w => `<div class="workout-item">${w.date}: ${w.pushups || 0} отж, ${w.squats || 0} присед, ${w.calves || 0} икры</div>`).join('')}
+      </div>
+    ` : '');
+  }
+  
+  const formEl = document.getElementById('trainingForm');
+  if (formEl) {
+    formEl.innerHTML = `
+      <h4>Записать тренировку</h4>
+      <div class="training-inputs">
+        <label>Отжимания <input type="number" id="inPushups" min="0" placeholder="40"></label>
+        <label>Приседания <input type="number" id="inSquats" min="0" placeholder="95"></label>
+        <label>Икры/ногу (10кг) <input type="number" id="inCalves" min="0" placeholder="30"></label>
+        <label>Скручивания <input type="number" id="inCrunches" min="0" placeholder="30"></label>
+        <label>Велосипед <input type="number" id="inBicycle" min="0" placeholder="30"></label>
+        <label>Книжка <input type="number" id="inBook" min="0" placeholder="15"></label>
+        <label>Резина руки (5–10кг) <input type="number" id="inBandArms" min="0" placeholder="повторений"></label>
+        <label>Резина ноги (15кг) <input type="number" id="inBandLegs" min="0" placeholder="повторений"></label>
+      </div>
+      <button class="btn btn-primary" id="saveWorkoutBtn">Сохранить тренировку</button>
+    `;
+    formEl.querySelector('#saveWorkoutBtn')?.addEventListener('click', saveSoldierWorkout);
+  }
+}
+
+function saveSoldierWorkout() {
+  const getVal = id => parseInt(document.getElementById(id)?.value) || 0;
+  const workout = {
+    date: new Date().toLocaleDateString('ru'),
+    pushups: getVal('inPushups'),
+    squats: getVal('inSquats'),
+    calves: getVal('inCalves'),
+    crunches: getVal('inCrunches'),
+    bicycle: getVal('inBicycle'),
+    book: getVal('inBook'),
+    bandArms: getVal('inBandArms'),
+    bandLegs: getVal('inBandLegs')
+  };
+  if (!workout.pushups && !workout.squats && !workout.calves && !workout.crunches && !workout.bicycle && !workout.book && !workout.bandArms && !workout.bandLegs) return;
+  
+  state.soldierTraining = state.soldierTraining || { records: {}, workoutHistory: [] };
+  state.soldierTraining.workoutHistory = state.soldierTraining.workoutHistory || [];
+  state.soldierTraining.workoutHistory.push(workout);
+  
+  const rec = state.soldierTraining.records || {};
+  if (workout.pushups > (rec.pushups || 0)) rec.pushups = workout.pushups;
+  if (workout.squats > (rec.squats || 0)) rec.squats = workout.squats;
+  if (workout.calves > (rec.calves || 0)) rec.calves = workout.calves;
+  if (workout.crunches > (rec.crunches || 0)) rec.crunches = workout.crunches;
+  if (workout.bicycle > (rec.bicycle || 0)) rec.bicycle = workout.bicycle;
+  if (workout.book > (rec.book || 0)) rec.book = workout.book;
+  state.soldierTraining.records = rec;
+  
+  state.trainCount = (state.trainCount || 0) + 1;
+  addXP(5, 'task');
+  saveState();
+  renderAll();
 }
 
 function renderOfficersSection() {
@@ -1251,6 +1385,7 @@ function renderAll() {
   renderCampaign();
   renderSkills();
   renderHallOfFame();
+  renderSoldierTraining();
   renderMilitaryTabs();
   renderOfficersSection();
   renderMedals();
