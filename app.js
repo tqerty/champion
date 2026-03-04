@@ -1,28 +1,129 @@
 // ========== КОНСТАНТЫ ==========
 
 const ACHIEVEMENT_XP = 25;
+const THANK_YOU_LETTER_XP = 15;
 
 const RANKS = [
-  { id: 'ryadovoy', name: 'Рядовой', xp: 0, order: 0 },
-  { id: 'efreitor', name: 'Ефрейтор', xp: 100, order: 1 },
-  { id: 'ml_sergeant', name: 'Младший сержант', xp: 250, order: 2 },
-  { id: 'sergeant', name: 'Сержант', xp: 500, order: 3 },
-  { id: 'st_sergeant', name: 'Старший сержант', xp: 800, order: 4 },
-  { id: 'starshina', name: 'Старшина', xp: 1200, order: 5 },
-  { id: 'praporshik', name: 'Прапорщик', xp: 1700, order: 6 },
-  { id: 'st_praporshik', name: 'Старший прапорщик', xp: 2300, order: 7 },
-  { id: 'ml_lieutenant', name: 'Младший лейтенант', xp: 3000, order: 8 },
-  { id: 'lieutenant', name: 'Лейтенант', xp: 4000, order: 9 },
-  { id: 'st_lieutenant', name: 'Старший лейтенант', xp: 5200, order: 10 },
-  { id: 'captain', name: 'Капитан', xp: 6600, order: 11 },
-  { id: 'major', name: 'Майор', xp: 8200, order: 12 },
-  { id: 'podpolkovnik', name: 'Подполковник', xp: 10000, order: 13 },
-  { id: 'polkovnik', name: 'Полковник', xp: 12000, order: 14 },
-  { id: 'gen_major', name: 'Генерал-майор', xp: 14500, order: 15 },
-  { id: 'gen_lieutenant', name: 'Генерал-лейтенант', xp: 17500, order: 16 },
-  { id: 'gen_polkovnik', name: 'Генерал-полковник', xp: 21000, order: 17 },
-  { id: 'gen_armii', name: 'Генерал армии', xp: 25000, order: 18 },
-  { id: 'marshal', name: 'Маршал РФ', xp: 30000, order: 19 }
+  { id: 'ryadovoy', name: 'Рядовой', xp: 0, order: 0, modules: 1,
+    desc: 'Начальное воинское звание. Первый шаг на пути воина.',
+    requirements: '0 XP, выполнить базовые квесты',
+    bonuses: '+0% XP, доступ к 1 модулю военки',
+    capabilities: ['Ежедневные задачи', 'Цели', 'Модуль 1: Основы военной службы'],
+    skill: null, dailyQuests: 3 },
+  { id: 'efreitor', name: 'Ефрейтор', xp: 100, order: 1, modules: 2,
+    desc: 'Звание за проявленную дисциплину и первые достижения.',
+    requirements: '100 XP, книга по логике (90 стр)',
+    bonuses: '+5% XP, +1 ежедневный квест',
+    capabilities: ['Модуль 2: Тактика и оружие', 'Навык: Дисциплина I'],
+    skill: 'Дисциплина I', dailyQuests: 4 },
+  { id: 'ml_sergeant', name: 'Младший сержант', xp: 250, order: 2, modules: 3,
+    desc: 'Командир отделения. Первый шаг в командовании.',
+    requirements: '250 XP, 5ч программирования, 5 тренировок',
+    bonuses: '+8% XP, доступ к спец-миссиям',
+    capabilities: ['Модуль 3: Уставы и ритуалы', 'Сложные квесты'],
+    skill: 'Лидерство I', dailyQuests: 4 },
+  { id: 'sergeant', name: 'Сержант', xp: 500, order: 3, modules: 4,
+    desc: 'Опытный командир. Ведёт подразделение в бою.',
+    requirements: '500 XP, 10ч программирования, 10 тренировок, тест структуры ВС',
+    bonuses: '+10% XP, новые типы задач',
+    capabilities: ['Модуль 4: Оружие и тактика', 'Спец-миссии'],
+    skill: 'Лидерство II', dailyQuests: 5 },
+  { id: 'st_sergeant', name: 'Старший сержант', xp: 800, order: 4, modules: 5,
+    desc: 'Заместитель командира взвода. Высокая ответственность.',
+    requirements: '800 XP, 20ч программирования, 20 тренировок, тест АК-47',
+    bonuses: '+12% XP',
+    capabilities: ['Модуль 5: Тактическая подготовка'],
+    skill: 'Тактика I', dailyQuests: 5 },
+  { id: 'starshina', name: 'Старшина', xp: 1200, order: 5, modules: 6,
+    desc: 'Старший по званию среди сержантов роты.',
+    requirements: '1200 XP',
+    bonuses: '+15% XP',
+    capabilities: ['Модуль 6: Военная администрация'],
+    skill: 'Организация I', dailyQuests: 5 },
+  { id: 'praporshik', name: 'Прапорщик', xp: 1700, order: 6, modules: 7,
+    desc: 'Специалист. Техническая и административная работа.',
+    requirements: '1700 XP',
+    bonuses: '+18% XP',
+    capabilities: ['Модуль 7: Специальная подготовка'],
+    skill: 'Специализация I', dailyQuests: 6 },
+  { id: 'st_praporshik', name: 'Старший прапорщик', xp: 2300, order: 7, modules: 8,
+    desc: 'Старший специалист. Руководство техническими подразделениями.',
+    requirements: '2300 XP',
+    bonuses: '+20% XP',
+    capabilities: ['Модуль 8: Оперативное искусство'],
+    skill: 'Специализация II', dailyQuests: 6 },
+  { id: 'ml_lieutenant', name: 'Младший лейтенант', xp: 3000, order: 8, modules: 9,
+    desc: 'Первое офицерское звание. Командир взвода.',
+    requirements: '3000 XP, тест тактики',
+    bonuses: '+22% XP, выбор специализации',
+    capabilities: ['Модуль 9: Офицерская подготовка', 'Специализация: Стратег/Воин/Универсал'],
+    skill: 'Командование I', dailyQuests: 6 },
+  { id: 'lieutenant', name: 'Лейтенант', xp: 4000, order: 9, modules: 10,
+    desc: 'Офицер. Командует взводом.',
+    requirements: '4000 XP',
+    bonuses: '+25% XP',
+    capabilities: ['Модуль 10: Стратегическое мышление'],
+    skill: 'Командование II', dailyQuests: 7 },
+  { id: 'st_lieutenant', name: 'Старший лейтенант', xp: 5200, order: 10, modules: 11,
+    desc: 'Старший офицер взвода. Заместитель командира роты.',
+    requirements: '5200 XP, тест званий',
+    bonuses: '+28% XP',
+    capabilities: ['Модуль 11: Управление подразделением'],
+    skill: 'Стратегия I', dailyQuests: 7 },
+  { id: 'captain', name: 'Капитан', xp: 6600, order: 11, modules: 12,
+    desc: 'Командир роты. Ключевая должность в структуре.',
+    requirements: '6600 XP',
+    bonuses: '+30% XP',
+    capabilities: ['Модуль 12: Рота в бою'],
+    skill: 'Стратегия II', dailyQuests: 8 },
+  { id: 'major', name: 'Майор', xp: 8200, order: 12, modules: 13,
+    desc: 'Заместитель командира батальона.',
+    requirements: '8200 XP, тест устава',
+    bonuses: '+33% XP',
+    capabilities: ['Модуль 13: Батальонные операции'],
+    skill: 'Оперативное искусство I', dailyQuests: 8 },
+  { id: 'podpolkovnik', name: 'Подполковник', xp: 10000, order: 13, modules: 14,
+    desc: 'Командир батальона.',
+    requirements: '10000 XP',
+    bonuses: '+35% XP',
+    capabilities: ['Модуль 14: Тактика соединений'],
+    skill: 'Оперативное искусство II', dailyQuests: 9 },
+  { id: 'polkovnik', name: 'Полковник', xp: 12000, order: 14, modules: 15,
+    desc: 'Командир полка.',
+    requirements: '12000 XP',
+    bonuses: '+38% XP',
+    capabilities: ['Модуль 15: Полковая тактика'],
+    skill: 'Стратегия III', dailyQuests: 9 },
+  { id: 'gen_major', name: 'Генерал-майор', xp: 14500, order: 15, modules: 16,
+    desc: 'Генеральское звание. Командует дивизией.',
+    requirements: '14500 XP',
+    bonuses: '+40% XP',
+    capabilities: ['Модуль 16: Дивизионные операции'],
+    skill: 'Стратегия IV', dailyQuests: 10 },
+  { id: 'gen_lieutenant', name: 'Генерал-лейтенант', xp: 17500, order: 16, modules: 17,
+    desc: 'Командует корпусом или армией.',
+    requirements: '17500 XP',
+    bonuses: '+42% XP',
+    capabilities: ['Модуль 17: Армейские операции'],
+    skill: 'Верховное командование I', dailyQuests: 10 },
+  { id: 'gen_polkovnik', name: 'Генерал-полковник', xp: 21000, order: 17, modules: 18,
+    desc: 'Высший генеральский состав.',
+    requirements: '21000 XP',
+    bonuses: '+45% XP',
+    capabilities: ['Модуль 18: Стратегическое планирование'],
+    skill: 'Верховное командование II', dailyQuests: 11 },
+  { id: 'gen_armii', name: 'Генерал армии', xp: 25000, order: 18, modules: 19,
+    desc: 'Высшее войсковое звание до Маршала.',
+    requirements: '25000 XP',
+    bonuses: '+48% XP',
+    capabilities: ['Модуль 19: Военная доктрина государства'],
+    skill: 'Верховное командование III', dailyQuests: 12 },
+  { id: 'marshal', name: 'Маршал РФ', xp: 30000, order: 19, modules: 20,
+    desc: 'Высшее воинское звание Российской Федерации.',
+    requirements: '30000 XP',
+    bonuses: '+50% XP',
+    capabilities: ['Все модули', 'Максимальные возможности'],
+    skill: 'Маршал', dailyQuests: 15 }
 ];
 
 const GOAL_TEMPLATES = [
@@ -163,6 +264,29 @@ const TESTS = {
 
 const ALL_TEST_IDS = ['structure', 'tactics', 'ranks_mil', 'ak47', 'charter', 'oath', 'duties', 'symbols', 'drill'];
 
+const MEDALS = [
+  { id: 'streak_7', icon: '🥇', name: '7 дней без пропуска', desc: 'Выполняй задачи 7 дней подряд', check: s => s.streakDays >= 7 },
+  { id: 'streak_30', icon: '🏅', name: '30 дней без пропуска', desc: 'Месяц дисциплины', check: s => s.streakDays >= 30 },
+  { id: 'tasks_100', icon: '🎯', name: '100 задач выполнено', desc: 'Сто побед над собой', check: s => (s.totalTasksCompleted || 0) >= 100 },
+  { id: 'learn_50h', icon: '🧠', name: '50 часов обучения', desc: 'Программирование + чтение', check: s => { const g = (s.goals || []).find(g => g.templateId === 'logic_book'); return (s.programHours || 0) + (g ? (g.currentValue || 0) : 0) >= 50; } },
+  { id: 'all_tests_medal', icon: '📋', name: 'Курсант-отличник', desc: 'Все военные тесты пройдены', check: s => ALL_TEST_IDS.every(id => s.questProgress[TEST_TO_QUEST[id]] || s.testsPassed[id]) },
+  { id: 'thank_you_3', icon: '📜', name: 'Три благодарности', desc: 'Три благодарственных письма', check: s => (s.thankYouLetters || 0) >= 3 }
+];
+
+const SPECIALIZATIONS = [
+  { id: 'strategist', icon: '🧠', name: 'Стратег-инженер', desc: 'Учёба, математика, программирование' },
+  { id: 'warrior', icon: '🏋️', name: 'Воин', desc: 'Физподготовка, выносливость' },
+  { id: 'universal', icon: '⚔️', name: 'Мастер на все руки', desc: 'Универсал — всё вместе' }
+];
+
+const MILITARY_DOCTRINE = [
+  'Не пропускать тренировки',
+  'Не обманывать систему',
+  'Улучшаться каждый день',
+  'Выполнять приказы (свои цели)',
+  'Дорожить честью и славой'
+];
+
 // ========== СОСТОЯНИЕ ==========
 
 let state = {
@@ -172,6 +296,9 @@ let state = {
   tasks: [],
   achievements: [],
   lastTaskResetDate: null,
+  totalTasksCompleted: 0,
+  thankYouLetters: 0,
+  specialization: null,
   questProgress: {
     read_logic: false,
     program_5h: false, program_10h: false, program_20h: false,
@@ -198,6 +325,7 @@ function loadState() {
   updateQuestProgressFromGoals();
   recalculateRank();
   resetDailyTasksIfNeeded();
+  checkMedals();
 }
 
 function resetDailyTasksIfNeeded() {
@@ -255,6 +383,14 @@ function renderCharacter() {
   
   updateShoulderStraps(rank.order);
   document.getElementById('rankBadge').textContent = rank.name.split(' ')[0];
+  
+  const readiness = getCombatReadiness();
+  const readinessEl = document.getElementById('combatReadiness');
+  const dot = readinessEl?.querySelector('.readiness-dot');
+  const textEl = document.getElementById('readinessText');
+  if (readinessEl) readinessEl.className = 'combat-readiness readiness-' + readiness;
+  if (dot) dot.textContent = readiness === 'high' ? '🟢' : readiness === 'medium' ? '🟡' : '🔴';
+  if (textEl) textEl.textContent = readiness === 'high' ? 'Высокая' : readiness === 'medium' ? 'Средняя' : 'Критическая';
 }
 
 function updateShoulderStraps(rankOrder) {
@@ -328,6 +464,124 @@ function renderTasks() {
   `).join('');
 }
 
+function renderCareerTimeline() {
+  const container = document.getElementById('careerTimeline');
+  if (!container) return;
+  const maxShow = 10;
+  const start = Math.max(0, state.currentRankIndex - 2);
+  const end = Math.min(RANKS.length, start + maxShow);
+  const visible = RANKS.slice(start, end);
+  container.innerHTML = `
+    <div class="timeline-track">
+      ${visible.map((r, idx) => {
+        const i = start + idx;
+        const unlocked = state.totalXP >= r.xp && allQuestsCompletedForRank(i);
+        const current = i === state.currentRankIndex;
+        return `
+          <div class="timeline-node ${unlocked ? 'unlocked' : ''} ${current ? 'current' : ''}" data-rank="${i}">
+            <div class="timeline-dot"></div>
+            <div class="timeline-label">${r.name}</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+    <p class="timeline-you">Ты здесь: <strong>${RANKS[state.currentRankIndex].name}</strong></p>
+  `;
+}
+
+function renderRankDetail() {
+  const container = document.getElementById('rankDetailCard');
+  if (!container) return;
+  const r = RANKS[state.currentRankIndex];
+  container.innerHTML = `
+    <div class="rank-detail">
+      <h3>${r.name}</h3>
+      <p class="rank-desc">${r.desc || ''}</p>
+      <div class="rank-meta">
+        <div><strong>📌 Требования:</strong> ${r.requirements || r.xp + ' XP'}</div>
+        <div><strong>🎁 Бонусы:</strong> ${r.bonuses || ''}</div>
+        <div><strong>🔓 Возможности:</strong></div>
+        <ul>${(r.capabilities || []).map(c => `<li>${c}</li>`).join('')}</ul>
+        ${r.skill ? `<div><strong>Навык:</strong> ${r.skill}</div>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function renderMilitaryTabs() {
+  document.querySelectorAll('.tab-btn[data-test]').forEach(btn => {
+    const testId = btn.dataset.test;
+    const questKey = TEST_TO_QUEST[testId];
+    const passed = state.questProgress[questKey] || state.testsPassed[testId];
+    const check = btn.querySelector('.tab-check');
+    if (check) {
+      check.textContent = passed ? ' ✓' : '';
+      check.classList.toggle('passed', !!passed);
+    }
+    const rank = RANKS[state.currentRankIndex];
+    const modules = rank?.modules || 1;
+    const tabOrder = ['structure','oath','duties','symbols','drill','tactics','ranks_mil','ak47','charter'];
+    const tabIdx = tabOrder.indexOf(btn.dataset.tab);
+    const moduleForTab = tabIdx < 5 ? 1 : 2;
+    btn.classList.toggle('locked', moduleForTab > modules);
+  });
+}
+
+function renderMedals() {
+  const container = document.getElementById('medalsGrid');
+  if (!container) return;
+  state.medals = state.medals || [];
+  container.innerHTML = MEDALS.map(m => {
+    const unlocked = state.medals.includes(m.id);
+    return `
+      <div class="medal-item ${unlocked ? 'unlocked' : ''}" data-id="${m.id}">
+        <div class="medal-icon">${m.icon}</div>
+        <div class="medal-name">${m.name}</div>
+        <div class="medal-desc">${m.desc}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderDoctrine() {
+  const container = document.getElementById('doctrineList');
+  if (!container) return;
+  container.innerHTML = MILITARY_DOCTRINE.map((rule, i) => `
+    <div class="doctrine-item">
+      <span class="doctrine-num">${i + 1}</span>
+      <span class="doctrine-text">${rule}</span>
+    </div>
+  `).join('');
+}
+
+function renderSpecialization() {
+  const container = document.getElementById('specializationGrid');
+  if (!container) return;
+  const canChoose = state.currentRankIndex >= 8;
+  const current = state.specialization;
+  container.innerHTML = SPECIALIZATIONS.map(s => `
+    <div class="spec-item ${current === s.id ? 'selected' : ''} ${!canChoose ? 'locked' : ''}" data-id="${s.id}">
+      <div class="spec-icon">${s.icon}</div>
+      <div class="spec-name">${s.name}</div>
+      <div class="spec-desc">${s.desc}</div>
+      ${!canChoose ? '<p class="spec-lock">Требуется: Младший лейтенант</p>' : ''}
+    </div>
+  `).join('');
+}
+
+function initSpecializationClick() {
+  const container = document.getElementById('specializationGrid');
+  if (!container) return;
+  container.onclick = (e) => {
+    const item = e.target.closest('.spec-item');
+    if (!item || item.classList.contains('locked')) return;
+    if (state.currentRankIndex < 8) return;
+    state.specialization = item.dataset.id;
+    saveState();
+    renderSpecialization();
+  };
+}
+
 function renderRanks() {
   const container = document.getElementById('ranksProgress');
   container.innerHTML = RANKS.map((r, i) => {
@@ -399,11 +653,45 @@ function escapeHtml(text) {
 
 // ========== ЛОГИКА ==========
 
+function getXPMultiplier() {
+  const rank = RANKS[state.currentRankIndex];
+  if (!rank || !rank.bonuses) return 1;
+  const m = rank.bonuses.match(/\+(\d+)% XP/);
+  return m ? 1 + parseInt(m[1]) / 100 : 1;
+}
+
 function addXP(amount) {
-  state.totalXP += amount;
+  const mult = getXPMultiplier();
+  state.totalXP += Math.round(amount * mult);
   checkRankUp();
   checkAchievements();
+  checkMedals();
   saveState();
+}
+
+function awardThankYouLetter() {
+  state.thankYouLetters = (state.thankYouLetters || 0) + 1;
+  addXP(THANK_YOU_LETTER_XP);
+  saveState();
+}
+
+function checkMedals() {
+  state.medals = state.medals || [];
+  MEDALS.forEach(m => {
+    if (!state.medals.includes(m.id) && m.check(state)) {
+      state.medals.push(m.id);
+    }
+  });
+}
+
+function getCombatReadiness() {
+  if (!state.lastTaskDate) return 'critical';
+  const now = new Date();
+  const last = new Date(state.lastTaskDate);
+  const diff = Math.floor((now - last) / (1000 * 60 * 60 * 24));
+  if (diff <= 1) return 'high';
+  if (diff <= 3) return 'medium';
+  return 'critical';
 }
 
 function unlockAchievement(id) {
@@ -496,6 +784,7 @@ function completeTask(index) {
     return;
   }
   task.done = true;
+  state.totalTasksCompleted = (state.totalTasksCompleted || 0) + 1;
   addXP(task.xp);
   
   if (task.goalId) {
@@ -649,8 +938,14 @@ function renderAll() {
   renderAchievements();
   renderGoals();
   renderTasks();
+  renderCareerTimeline();
+  renderRankDetail();
   renderRanks();
   renderQuests();
+  renderMilitaryTabs();
+  renderMedals();
+  renderDoctrine();
+  renderSpecialization();
 }
 
 document.getElementById('addGoalBtn').addEventListener('click', () => {
@@ -755,6 +1050,14 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
 document.addEventListener('DOMContentLoaded', () => {
   renderAll();
+  initSpecializationClick();
+  
+  document.getElementById('thankYouLetterBtn')?.addEventListener('click', () => {
+    if (confirm('Выдать благодарственное письмо за доблестное решение сложных задач и достойные поступки? (+15 XP)')) {
+      awardThankYouLetter();
+      renderAll();
+    }
+  });
   
   document.getElementById('addProgram1')?.addEventListener('click', () => {
     state.programHours++;

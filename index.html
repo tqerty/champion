@@ -22,6 +22,9 @@
         <a href="#ranks" class="nav-link">Звания</a>
         <a href="#quests" class="nav-link">Квесты</a>
         <a href="#military" class="nav-link">Военка</a>
+        <a href="#medals" class="nav-link">Медали</a>
+        <a href="#doctrine" class="nav-link">Доктрина</a>
+        <a href="#specialization" class="nav-link">Специализация</a>
       </div>
     </nav>
 
@@ -42,6 +45,10 @@
           <div class="character-info">
             <h1 class="character-name" id="characterName">Рядовой Минь</h1>
             <p class="character-rank" id="displayRank">Рядовой</p>
+            <div class="combat-readiness" id="combatReadiness">
+              <span class="readiness-dot"></span>
+              <span class="readiness-label">Боевая готовность: <strong id="readinessText">—</strong></span>
+            </div>
             <div class="xp-bar-container">
               <div class="xp-label">
                 <span>Опыт: <strong id="totalXP">0</strong></span>
@@ -51,6 +58,9 @@
                 <div class="xp-fill" id="xpFill"></div>
               </div>
             </div>
+            <button class="btn btn-secondary thank-you-btn" id="thankYouLetterBtn" title="За доблестное решение сложных задач и достойные поступки">
+              📜 Благодарственное письмо (+15 XP)
+            </button>
           </div>
         </div>
       </div>
@@ -173,7 +183,9 @@
     <!-- Звания -->
     <section id="ranks" class="section ranks-section">
       <h2 class="section-title">🎖️ Звания ВС РФ</h2>
-      <p class="section-desc">Прогресс по воинским званиям</p>
+      <p class="section-desc">Прогресс по воинским званиям. Требования, бонусы и возможности для каждого звания.</p>
+      <div class="career-timeline" id="careerTimeline"></div>
+      <div class="rank-detail-card" id="rankDetailCard"></div>
       <div class="ranks-progress" id="ranksProgress"></div>
     </section>
 
@@ -191,51 +203,61 @@
     <!-- Военные знания -->
     <section id="military" class="section military-section">
       <h2 class="section-title">📚 Военные знания</h2>
-      <div class="military-tabs">
-        <button class="tab-btn active" data-tab="structure">Структура ВС РФ</button>
-        <button class="tab-btn" data-tab="oath">Военная присяга</button>
-        <button class="tab-btn" data-tab="duties">Обязанности рядового</button>
-        <button class="tab-btn" data-tab="symbols">Символы и ритуалы</button>
-        <button class="tab-btn" data-tab="drill">Строевая подготовка</button>
-        <button class="tab-btn" data-tab="tactics">Тактика</button>
-        <button class="tab-btn" data-tab="ranks_mil">Звания</button>
-        <button class="tab-btn" data-tab="ak47">АК-47</button>
-        <button class="tab-btn" data-tab="charter">Устав</button>
+      <p class="section-desc">Модуль 1 (Рядовой): основы. Модуль 2 (Ефрейтор+): тактика и оружие. Пройденные тесты отмечены ✓</p>
+      <div class="military-tabs" id="militaryTabs">
+        <button class="tab-btn active" data-tab="structure" data-test="structure"><span class="tab-check"></span>Структура ВС РФ</button>
+        <button class="tab-btn" data-tab="oath" data-test="oath"><span class="tab-check"></span>Военная присяга</button>
+        <button class="tab-btn" data-tab="duties" data-test="duties"><span class="tab-check"></span>Обязанности рядового</button>
+        <button class="tab-btn" data-tab="symbols" data-test="symbols"><span class="tab-check"></span>Символы и ритуалы</button>
+        <button class="tab-btn" data-tab="drill" data-test="drill"><span class="tab-check"></span>Строевая подготовка</button>
+        <button class="tab-btn" data-tab="tactics" data-test="tactics"><span class="tab-check"></span>Тактика</button>
+        <button class="tab-btn" data-tab="ranks_mil" data-test="ranks_mil"><span class="tab-check"></span>Звания</button>
+        <button class="tab-btn" data-tab="ak47" data-test="ak47"><span class="tab-check"></span>АК-47</button>
+        <button class="tab-btn" data-tab="charter" data-test="charter"><span class="tab-check"></span>Устав</button>
       </div>
       <div class="military-content">
         <div class="tab-content active" id="tab-structure">
           <div class="military-info">
-            <h3>Структура Вооружённых Сил РФ</h3>
+            <h3>Структура Вооружённых Сил РФ (Модуль 1)</h3>
+            <p>Вооружённые Силы РФ — государственная военная организация для отражения агрессии и защиты территориальной целостности.</p>
             <ul>
-              <li><strong>Сухопутные войска (СВ)</strong> — основа армии, пехота, танки, артиллерия</li>
-              <li><strong>Воздушно-космические силы (ВКС)</strong> — авиация, ПВО, космос</li>
-              <li><strong>Военно-морской флот (ВМФ)</strong> — надводные и подводные силы</li>
-              <li><strong>Ракетные войска стратегического назначения (РВСН)</strong></li>
-              <li><strong>Воздушно-десантные войска (ВДВ)</strong></li>
+              <li><strong>Сухопутные войска (СВ)</strong> — основа армии: мотострелковые, танковые, ракетные войска, артиллерия, ПВО</li>
+              <li><strong>Воздушно-космические силы (ВКС)</strong> — авиация, противовоздушная оборона, космические войска</li>
+              <li><strong>Военно-морской флот (ВМФ)</strong> — надводные и подводные силы, морская авиация</li>
+              <li><strong>РВСН</strong> — ядерный щит страны, стратегические ракеты</li>
+              <li><strong>ВДВ</strong> — мобильные войска, десантные операции</li>
+              <li><strong>Органы военного управления</strong> — Министерство обороны, Генштаб</li>
             </ul>
             <button class="btn btn-secondary" data-test="structure">Пройти тест</button>
           </div>
         </div>
         <div class="tab-content" id="tab-oath">
           <div class="military-info">
-            <h3>Военная присяга РФ</h3>
-            <p>Текст присяги (ФЗ №53-ФЗ):</p>
+            <h3>Военная присяга РФ (Модуль 1)</h3>
+            <p>Присяга — торжественная клятва военнослужащего. Устанавливается Федеральным законом «О воинской обязанности и военной службе».</p>
             <blockquote>«Я, (фамилия, имя, отчество), торжественно присягаю на верность своему Отечеству — Российской Федерации. Клянусь свято соблюдать Конституцию РФ, строго выполнять требования воинских уставов, приказы командиров и начальников. Клянусь достойно исполнять воинский долг, мужественно защищать свободу, независимость и конституционный строй России, народ и Отечество.»</blockquote>
-            <p>Присяга приносится перед Государственным флагом РФ и Боевым Знаменем части.</p>
+            <ul>
+              <li>Присяга приносится перед Государственным флагом РФ и Боевым Знаменем части</li>
+              <li>Читается вслух перед строем</li>
+              <li>После присяги военнослужащий подписывает личный листок</li>
+            </ul>
             <button class="btn btn-secondary" data-test="oath">Пройти тест</button>
           </div>
         </div>
         <div class="tab-content" id="tab-duties">
           <div class="military-info">
-            <h3>Обязанности военнослужащего (рядовой)</h3>
+            <h3>Обязанности военнослужащего (Модуль 1)</h3>
+            <p>Общие обязанности установлены Уставом внутренней службы ВС РФ.</p>
             <ul>
-              <li>Соблюдать Конституцию РФ и законы</li>
+              <li>Соблюдать Конституцию РФ и законы Российской Федерации</li>
               <li>Выполнять требования воинских уставов</li>
               <li>Исполнять приказы командиров и начальников</li>
               <li>Достойно исполнять воинский долг</li>
               <li>Защищать свободу, независимость и конституционный строй России</li>
               <li>Быть верным Военной присяге</li>
-              <li>Дорожить честью и боевой славой</li>
+              <li>Дорожить честью и боевой славой Вооружённых Сил</li>
+              <li>Совершенствовать воинское мастерство, содержать в готовности вооружение</li>
+              <li>Беречь военное имущество, хранить государственную тайну</li>
             </ul>
             <button class="btn btn-secondary" data-test="duties">Пройти тест</button>
           </div>
@@ -255,26 +277,32 @@
         </div>
         <div class="tab-content" id="tab-drill">
           <div class="military-info">
-            <h3>Строевая подготовка — основы</h3>
+            <h3>Строевая подготовка — основы (Модуль 1)</h3>
+            <p>Строевая подготовка — предмет боевой подготовки, формирующий дисциплину и слаженность.</p>
             <ul>
               <li><strong>Строй</strong> — установленное размещение военнослужащих для совместных действий</li>
               <li><strong>Шеренга</strong> — строй, в котором военнослужащие размещены на одной линии</li>
               <li><strong>Колонна</strong> — строй, в котором военнослужащие расположены в затылок друг другу</li>
-              <li><strong>Команды</strong> — «Смирно!», «Вольно!», «Равняйсь!», «Направо!», «Налево!»</li>
+              <li><strong>Команды</strong> — «Смирно!», «Вольно!», «Равняйсь!», «Направо!», «Налево!», «Кругом!»</li>
               <li><strong>Строевой шаг</strong> — шаг, при котором нога выносится на 15–20 см от земли</li>
+              <li><strong>Походный шаг</strong> — обычный шаг при движении вне строя</li>
+              <li><strong>Воинское приветствие</strong> — отдание чести: при надетом головном уборе — приложить руку к головному убору</li>
             </ul>
             <button class="btn btn-secondary" data-test="drill">Пройти тест</button>
           </div>
         </div>
         <div class="tab-content" id="tab-tactics">
           <div class="military-info">
-            <h3>Тактика и стратегия</h3>
+            <h3>Тактика и стратегия (Модуль 2)</h3>
+            <p>Тактическая подготовка — основа боевой выучки подразделений.</p>
             <ul>
               <li><strong>Тактика</strong> — подготовка и ведение боя подразделениями. Виды: наступление, оборона, встречный бой</li>
               <li><strong>Стратегия</strong> — искусство ведения войны в целом, планирование кампаний</li>
               <li><strong>Оперативное искусство</strong> — связующее звено между тактикой и стратегией</li>
               <li><strong>Бой</strong> — организованные удары и манёвр с целью уничтожения противника</li>
               <li><strong>Оборона</strong> — вид боевых действий с целью отражения наступления</li>
+              <li><strong>Наступление</strong> — вид боевых действий для разгрома противника</li>
+              <li><strong>Встречный бой</strong> — столкновение сторон при взаимном наступлении</li>
             </ul>
             <button class="btn btn-secondary" data-test="tactics">Пройти тест</button>
           </div>
@@ -295,14 +323,16 @@
         </div>
         <div class="tab-content" id="tab-ak47">
           <div class="military-info">
-            <h3>Устройство автомата Калашникова (АК-47)</h3>
+            <h3>Устройство автомата Калашникова (Модуль 2)</h3>
+            <p>АК — наиболее распространённое стрелковое оружие в мире. Создан М.Т. Калашниковым.</p>
             <ul>
               <li><strong>Ствол</strong> — направляет пулю, имеет 4 правых нареза</li>
-              <li><strong>Затворная рама</strong> — приводит в действие затвор</li>
+              <li><strong>Затворная рама</strong> — приводит в действие затвор, отводит гильзу</li>
               <li><strong>Затвор</strong> — запирает канал ствола при выстреле</li>
-              <li><strong>Магазин</strong> — на 30 патронов 7,62×39 мм</li>
-              <li><strong>Приклад</strong> — деревянный или складной</li>
-              <li><strong>УСМ</strong> — одиночный и автоматический огонь</li>
+              <li><strong>Магазин</strong> — на 30 патронов 7,62×39 мм (АК-47) или 5,45×39 мм (АК-74)</li>
+              <li><strong>Приклад</strong> — деревянный или складной (для десантных модификаций)</li>
+              <li><strong>УСМ</strong> — ударно-спусковой механизм: одиночный и автоматический огонь</li>
+              <li><strong>Предохранитель-переводчик</strong> — блокирует спуск, переключает режимы огня</li>
             </ul>
             <button class="btn btn-secondary" data-test="ak47">Пройти тест</button>
           </div>
@@ -320,6 +350,27 @@
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- Медали -->
+    <section id="medals" class="section medals-section">
+      <h2 class="section-title">🏆 Награды и медали</h2>
+      <p class="section-desc">Заслуженные награды за достижения</p>
+      <div class="medals-grid" id="medalsGrid"></div>
+    </section>
+
+    <!-- Военная доктрина -->
+    <section id="doctrine" class="section doctrine-section">
+      <h2 class="section-title">🧠 Военная доктрина (Кодекс бойца)</h2>
+      <p class="section-desc">Правила, которым следует чемпион</p>
+      <div class="doctrine-list" id="doctrineList"></div>
+    </section>
+
+    <!-- Специализация -->
+    <section id="specialization" class="section specialization-section">
+      <h2 class="section-title">🧬 Специализация</h2>
+      <p class="section-desc">Выбери путь при звании Младший лейтенант и выше</p>
+      <div class="specialization-grid" id="specializationGrid"></div>
     </section>
 
     <!-- Анимация повышения звания -->

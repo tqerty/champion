@@ -98,6 +98,9 @@ body {
 #ranks { animation-delay: 0.32s; }
 #quests { animation-delay: 0.4s; }
 #military { animation-delay: 0.48s; }
+#medals { animation-delay: 0.56s; }
+#doctrine { animation-delay: 0.64s; }
+#specialization { animation-delay: 0.72s; }
 
 @keyframes fadeInUp {
   to {
@@ -263,7 +266,23 @@ body {
 .character-rank {
   font-size: 1.2rem;
   color: var(--text-muted);
-  margin-bottom: 20px;
+  margin-bottom: 12px;
+}
+
+.combat-readiness {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+.readiness-dot { font-size: 1rem; }
+.combat-readiness.readiness-high .readiness-dot { filter: none; }
+.combat-readiness.readiness-critical .readiness-dot { opacity: 0.8; }
+
+.thank-you-btn {
+  margin-top: 20px;
+  font-size: 0.9rem;
 }
 
 .xp-bar-container {
@@ -538,6 +557,86 @@ input:focus {
   color: var(--text-muted);
 }
 
+/* Карьерный рост */
+.career-timeline {
+  margin-bottom: 32px;
+}
+.timeline-track {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.timeline-node {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 2px solid var(--border);
+}
+.timeline-node.unlocked .timeline-dot {
+  background: var(--green-accent);
+  border-color: var(--green-accent);
+}
+.timeline-node.current .timeline-dot {
+  background: var(--gold);
+  border-color: var(--gold);
+  box-shadow: 0 0 10px rgba(201, 162, 39, 0.5);
+}
+.timeline-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.timeline-node.unlocked .timeline-label { color: var(--text); }
+.timeline-node.current .timeline-label { color: var(--gold); font-weight: 700; }
+.timeline-you {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* Детали звания */
+.rank-detail-card {
+  margin-bottom: 24px;
+}
+.rank-detail {
+  background: var(--bg-card);
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  padding: 24px;
+}
+.rank-detail h3 {
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+.rank-desc {
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+.rank-meta {
+  font-size: 0.9rem;
+}
+.rank-meta > div { margin-bottom: 8px; }
+.rank-meta ul {
+  margin: 8px 0 0 20px;
+  padding: 0;
+}
+
+/* Галочки на тестах */
+.tab-check.passed {
+  color: var(--green-accent);
+  font-weight: 700;
+}
+.tab-btn.locked {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 /* Квесты */
 .quests-list {
   display: flex;
@@ -806,6 +905,116 @@ input:focus {
 .modal-content h3 {
   margin-bottom: 24px;
   color: var(--gold);
+}
+
+/* Медали */
+.medals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+.medal-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  opacity: 0.5;
+  transition: all 0.3s;
+}
+.medal-item.unlocked {
+  opacity: 1;
+  border-color: var(--gold);
+  box-shadow: 0 0 20px rgba(201, 162, 39, 0.2);
+}
+.medal-icon {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+}
+.medal-name {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.medal-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Военная доктрина */
+.doctrine-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.doctrine-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.doctrine-num {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  background: var(--gold);
+  color: var(--bg-dark);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.doctrine-text {
+  flex: 1;
+}
+
+/* Специализация */
+.specialization-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+.spec-item {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.spec-item:hover:not(.locked) {
+  border-color: var(--gold);
+  transform: translateY(-4px);
+}
+.spec-item.selected {
+  border-color: var(--gold);
+  box-shadow: 0 0 25px rgba(201, 162, 39, 0.3);
+}
+.spec-item.locked {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.spec-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
+.spec-name {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.spec-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.spec-lock {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 12px;
 }
 
 /* Футер */
