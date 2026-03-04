@@ -98,9 +98,10 @@ body {
 #ranks { animation-delay: 0.32s; }
 #quests { animation-delay: 0.4s; }
 #military { animation-delay: 0.48s; }
-#medals { animation-delay: 0.56s; }
-#doctrine { animation-delay: 0.64s; }
-#specialization { animation-delay: 0.72s; }
+#officers { animation-delay: 0.52s; }
+#medals { animation-delay: 0.6s; }
+#doctrine { animation-delay: 0.68s; }
+#specialization { animation-delay: 0.76s; }
 
 @keyframes fadeInUp {
   to {
@@ -1015,6 +1016,65 @@ input:focus {
   font-size: 0.75rem;
   color: var(--text-muted);
   margin-top: 12px;
+}
+
+/* Офицеры */
+.officers-section {
+  background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-elevated) 100%);
+  border: 1px solid rgba(201, 162, 39, 0.3);
+  border-radius: 16px;
+  padding: 40px;
+}
+.officers-intro {
+  margin-bottom: 32px;
+  padding: 20px;
+  background: var(--bg-elevated);
+  border-radius: 12px;
+  border-left: 4px solid var(--gold);
+}
+.officers-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.officer-block {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+}
+.officer-block h3 {
+  color: var(--gold);
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+}
+.officer-block h4 {
+  color: var(--gold-light);
+  margin: 16px 0 8px;
+  font-size: 1rem;
+}
+.officer-block ul {
+  padding-left: 24px;
+  margin: 0;
+}
+.officer-block li {
+  margin-bottom: 10px;
+}
+.officer-note {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: rgba(201, 162, 39, 0.1);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Военные вкладки h4 */
+.military-info h4 {
+  color: var(--gold-light);
+  margin: 20px 0 10px;
+  font-size: 1rem;
 }
 
 /* Футер */

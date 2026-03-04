@@ -509,22 +509,37 @@ function renderRankDetail() {
 }
 
 function renderMilitaryTabs() {
-  document.querySelectorAll('.tab-btn[data-test]').forEach(btn => {
+  const rank = RANKS[state.currentRankIndex];
+  const modules = rank?.modules || 1;
+  const tabOrder = ['structure','oath','duties','symbols','drill','tactics','ranks_mil','ak47','charter','tactical_combat','squad_drill','topography','military_basics','discipline_charter'];
+  document.querySelectorAll('.tab-btn').forEach(btn => {
     const testId = btn.dataset.test;
-    const questKey = TEST_TO_QUEST[testId];
-    const passed = state.questProgress[questKey] || state.testsPassed[testId];
-    const check = btn.querySelector('.tab-check');
-    if (check) {
-      check.textContent = passed ? ' ✓' : '';
-      check.classList.toggle('passed', !!passed);
+    if (testId) {
+      const questKey = TEST_TO_QUEST[testId];
+      const passed = state.questProgress[questKey] || state.testsPassed[testId];
+      const check = btn.querySelector('.tab-check');
+      if (check) {
+        check.textContent = passed ? ' ✓' : '';
+        check.classList.toggle('passed', !!passed);
+      }
     }
-    const rank = RANKS[state.currentRankIndex];
-    const modules = rank?.modules || 1;
-    const tabOrder = ['structure','oath','duties','symbols','drill','tactics','ranks_mil','ak47','charter'];
-    const tabIdx = tabOrder.indexOf(btn.dataset.tab);
+    const tabId = btn.dataset.tab;
+    const tabIdx = tabOrder.indexOf(tabId);
     const moduleForTab = tabIdx < 5 ? 1 : 2;
-    btn.classList.toggle('locked', moduleForTab > modules);
+    btn.classList.toggle('locked', tabIdx >= 0 && moduleForTab > modules);
   });
+}
+
+function renderOfficersSection() {
+  const section = document.getElementById('officers');
+  const navLink = document.querySelector('a[href="#officers"]');
+  const isOfficer = state.currentRankIndex >= 8;
+  if (section) {
+    section.style.display = isOfficer ? 'block' : 'none';
+  }
+  if (navLink) {
+    navLink.style.display = isOfficer ? 'flex' : 'none';
+  }
 }
 
 function renderMedals() {
@@ -943,6 +958,7 @@ function renderAll() {
   renderRanks();
   renderQuests();
   renderMilitaryTabs();
+  renderOfficersSection();
   renderMedals();
   renderDoctrine();
   renderSpecialization();
