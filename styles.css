@@ -288,6 +288,65 @@ body {
   align-items: center;
   margin-top: 20px;
 }
+/* Ежедневный сундук */
+.daily-chest-container {
+  margin: 20px 0;
+}
+.chest-wrapper {
+  display: inline-block;
+}
+.chest-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 20px 28px;
+  background: linear-gradient(145deg, #2a4a26 0%, #1a3319 100%);
+  border: 2px solid var(--gold);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(201, 162, 39, 0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.chest-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 8px 30px rgba(201, 162, 39, 0.4);
+  border-color: var(--gold-light);
+}
+.chest-btn:disabled {
+  cursor: default;
+  opacity: 0.7;
+  filter: grayscale(0.5);
+}
+.chest-btn.chest-opened {
+  animation: chestPop 0.5s ease;
+}
+@keyframes chestPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+.chest-icon {
+  font-size: 3rem;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+.daily-chest-container.available .chest-icon {
+  animation: chestGlow 2s ease-in-out infinite;
+}
+@keyframes chestGlow {
+  0%, 100% { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)) brightness(1); }
+  50% { filter: drop-shadow(0 0 12px rgba(201,162,39,0.6)) brightness(1.2); }
+}
+.chest-label {
+  font-weight: 700;
+  color: var(--gold);
+  font-size: 0.95rem;
+}
+.chest-timer {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
 .thank-you-btn { font-size: 0.9rem; }
 .hardcore-toggle {
   display: flex;
@@ -441,65 +500,193 @@ body {
 .hall-label { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; }
 .hall-value { font-size: 1.2rem; font-weight: 700; color: var(--gold); }
 
-/* Тренировка солдата */
-.soldier-training-section { background: var(--bg-elevated); border-radius: 16px; padding: 32px; }
-.training-standards { margin-bottom: 24px; }
-.training-standards h3 { color: var(--gold); margin-bottom: 16px; }
+/* Тренировка солдата — игровой стиль */
+.soldier-training-section {
+  background: linear-gradient(180deg, #0f1f0f 0%, #1a2d1a 50%, #152815 100%);
+  border-radius: 24px;
+  padding: 40px;
+  border: 2px solid rgba(201, 162, 39, 0.4);
+  box-shadow: 0 0 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(201,162,39,0.1);
+  position: relative;
+  overflow: hidden;
+}
+.soldier-training-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0.8;
+}
+.training-standards { margin-bottom: 28px; }
+.training-standards h3 {
+  color: var(--gold-light);
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+  text-shadow: 0 0 20px rgba(201, 162, 39, 0.3);
+}
 .standards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
 }
 .std-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 16px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  padding: 20px 16px;
+  background: linear-gradient(145deg, #1e2e1e 0%, #152015 100%);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
-.std-icon { font-size: 1.5rem; margin-bottom: 4px; }
-.std-item strong { color: var(--gold); }
-.std-item.passed { border-color: var(--green-accent); background: rgba(61, 122, 53, 0.15); }
-.standards-resistance {
-  padding: 12px 16px;
-  background: rgba(201, 162, 39, 0.1);
-  border-radius: 8px;
+.std-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+}
+.std-item.passed {
+  border-color: var(--green-accent);
+  background: linear-gradient(145deg, rgba(61, 122, 53, 0.3) 0%, rgba(45, 90, 39, 0.2) 100%);
+  box-shadow: 0 0 25px rgba(61, 122, 53, 0.3);
+}
+.std-item.passed::after {
+  content: '✓';
+  position: absolute;
+  top: 8px;
+  right: 16px;
+  background: var(--green-accent);
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.9rem;
+  font-weight: 700;
 }
-.standards-resistance h4 { margin-bottom: 8px; color: var(--gold-light); }
+.std-item { position: relative; }
+.std-icon {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+}
+.std-item strong {
+  color: var(--gold);
+  font-size: 1.2rem;
+  margin-top: 4px;
+}
+.std-item span:not(.std-icon) { font-size: 0.85rem; color: var(--text-muted); }
+.standards-resistance {
+  padding: 20px 24px;
+  background: linear-gradient(135deg, rgba(201, 162, 39, 0.15) 0%, rgba(201, 162, 39, 0.05) 100%);
+  border-radius: 16px;
+  font-size: 0.95rem;
+  border: 1px solid rgba(201, 162, 39, 0.3);
+}
+.standards-resistance h4 { margin-bottom: 10px; color: var(--gold-light); font-size: 1rem; }
 .records-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 8px;
-  margin-bottom: 16px;
-  font-size: 0.9rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
 }
-.workout-history { font-size: 0.9rem; color: var(--text-muted); }
-.workout-item { padding: 6px 0; border-bottom: 1px solid var(--border); }
-.training-form { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border); }
-.training-form h4 { margin-bottom: 16px; color: var(--gold); }
+.records-grid > div {
+  padding: 14px 18px;
+  background: var(--bg-card);
+  border-radius: 12px;
+  border-left: 4px solid var(--gold);
+  font-size: 0.95rem;
+}
+.records-with-bars .record-card {
+  padding: 18px;
+  border-left: none;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.record-name { font-size: 0.9rem; opacity: 0.9; }
+.record-val { font-size: 1.2rem; }
+.record-val strong { color: var(--gold); }
+.record-bar {
+  height: 6px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.record-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green-primary), var(--gold));
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+.record-hint { font-size: 0.75rem; color: var(--text-muted); }
+.records-grid strong { color: var(--gold); }
+.workout-history {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 12px;
+}
+.workout-item {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+.training-form {
+  margin-top: 28px;
+  padding-top: 28px;
+  border-top: 2px solid rgba(201, 162, 39, 0.3);
+}
+.training-form h4 {
+  margin-bottom: 20px;
+  color: var(--gold);
+  font-size: 1.1rem;
+}
 .training-inputs {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
 }
 .training-inputs label {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   font-size: 0.9rem;
 }
 .training-inputs input {
-  padding: 8px 12px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  padding: 12px 16px;
+  background: rgba(0,0,0,0.3);
+  border: 2px solid var(--border);
+  border-radius: 12px;
   color: var(--text);
   width: 100%;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+.training-inputs input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.2);
+}
+#saveWorkoutBtn {
+  padding: 14px 32px;
+  font-size: 1rem;
+  background: linear-gradient(145deg, var(--green-accent) 0%, var(--green-primary) 100%);
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(61, 122, 53, 0.4);
+}
+#saveWorkoutBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(61, 122, 53, 0.5);
 }
 
 .xp-bar-container {
