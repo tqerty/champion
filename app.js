@@ -132,7 +132,7 @@ const GOAL_TEMPLATES = [
     name: 'Прочитать книгу по логике',
     dailyTask: '3 стр по логике',
     dailyXP: 10,
-    questTarget: 90,
+    questTarget: 30,
     perTask: 3,
     questId: 'read_logic'
   }
@@ -470,7 +470,7 @@ function updateQuestProgressFromGoals() {
   state.goals.forEach(g => {
     if (g.templateId === 'logic_book' || (g.text && (g.text.toLowerCase().includes('логик') || g.text.toLowerCase().includes('логике')))) {
       if (g.templateId === 'logic_book') {
-        state.questProgress.read_logic = (g.currentValue || 0) >= Math.min(logicTarget, g.questTarget || 90);
+        state.questProgress.read_logic = (g.currentValue || 0) >= Math.min(logicTarget, g.questTarget || 30);
       } else {
         state.questProgress.read_logic = (g.currentValue || 0) >= logicTarget || g.done;
       }
@@ -630,7 +630,7 @@ function renderAchievements() {
 function renderGoals() {
   const list = document.getElementById('goalsList');
   list.innerHTML = state.goals.map((g, i) => {
-    const progress = g.templateId ? ` (${g.currentValue || 0}/${g.questTarget || 90})` : '';
+    const progress = g.templateId ? ` (${g.currentValue || 0}/${g.questTarget || 30})` : '';
     return `
     <div class="goal-item ${g.done ? 'done' : ''}" data-index="${i}">
       <div class="goal-check ${g.done ? 'checked' : ''}" data-index="${i}" data-toggle></div>
@@ -1244,7 +1244,7 @@ function checkAchievements() {
   if (state.currentRankIndex >= 11) unlockAchievement('captain');
   if (state.currentRankIndex >= 12) unlockAchievement('major');
   if (state.questProgress.read_logic) unlockAchievement('logic_book');
-  if (getLogicPagesRead() >= 90) unlockAchievement('logic_pages');
+  if (getLogicPagesRead() >= 30) unlockAchievement('logic_pages');
   if (state.programHours >= 10) unlockAchievement('programming');
   if (state.trainCount >= 20) unlockAchievement('fitness');
   if (state.questProgress.military_test) unlockAchievement('military_test');
@@ -1281,7 +1281,7 @@ function completeTask(index) {
     const goal = state.goals.find(g => g.id === task.goalId);
     if (goal) {
       goal.currentValue = (goal.currentValue || 0) + (goal.perTask || 1);
-      if (goal.currentValue >= (goal.questTarget || 90)) {
+      if (goal.currentValue >= (goal.questTarget || 30)) {
         goal.done = true;
       }
       updateQuestProgressFromGoals();
@@ -1313,7 +1313,7 @@ function uncompleteTask(index) {
     const goal = state.goals.find(g => g.id === task.goalId);
     if (goal) {
       goal.currentValue = Math.max(0, (goal.currentValue || 0) - (goal.perTask || 1));
-      if (goal.currentValue < (goal.questTarget || 90)) {
+      if (goal.currentValue < (goal.questTarget || 30)) {
         goal.done = false;
       }
       updateQuestProgressFromGoals();
