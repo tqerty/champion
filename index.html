@@ -26,8 +26,16 @@
         <a href="#medals" class="nav-link">Медали</a>
         <a href="#doctrine" class="nav-link">Доктрина</a>
         <a href="#specialization" class="nav-link">Специализация</a>
+        <a href="#strategic" class="nav-link">Цель</a>
+        <a href="#campaign" class="nav-link">Кампания</a>
+        <a href="#skills" class="nav-link">Навыки</a>
+        <a href="#hall" class="nav-link">Зал славы</a>
       </div>
     </nav>
+
+    <!-- Баннеры: дисциплина, секретная миссия -->
+    <div id="disciplineBanner" class="banner banner-discipline" style="display:none"></div>
+    <div id="secretMissionBanner" class="banner banner-secret" style="display:none"></div>
 
     <!-- Герой / Персонаж -->
     <section id="hero" class="section hero-section">
@@ -46,10 +54,15 @@
           <div class="character-info">
             <h1 class="character-name" id="characterName">Рядовой Минь</h1>
             <p class="character-rank" id="displayRank">Рядовой</p>
+            <div class="mission-status" id="missionStatus">
+              <span class="status-dot"></span>
+              <span class="status-label">Статус: <strong id="statusText">—</strong></span>
+            </div>
             <div class="combat-readiness" id="combatReadiness">
               <span class="readiness-dot"></span>
               <span class="readiness-label">Боевая готовность: <strong id="readinessText">—</strong></span>
             </div>
+            <div class="titles-display" id="titlesDisplay"></div>
             <div class="xp-bar-container">
               <div class="xp-label">
                 <span>Опыт: <strong id="totalXP">0</strong></span>
@@ -59,9 +72,15 @@
                 <div class="xp-fill" id="xpFill"></div>
               </div>
             </div>
-            <button class="btn btn-secondary thank-you-btn" id="thankYouLetterBtn" title="За доблестное решение сложных задач и достойные поступки">
-              📜 Благодарственное письмо (+15 XP)
-            </button>
+            <div class="hero-controls">
+              <button class="btn btn-secondary thank-you-btn" id="thankYouLetterBtn" title="За доблестное решение сложных задач и достойные поступки">
+                📜 Благодарственное письмо (+15 XP)
+              </button>
+              <label class="hardcore-toggle">
+                <input type="checkbox" id="hardcoreMode" title="XP сложнее, штрафы сильнее, бонусы выше">
+                🧨 Хардкор
+              </label>
+            </div>
           </div>
         </div>
       </div>
@@ -544,6 +563,34 @@
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- Стратегическая цель -->
+    <section id="strategic" class="section strategic-section">
+      <h2 class="section-title">🧭 Главная военная цель</h2>
+      <p class="section-desc">Долгосрочная стратегия</p>
+      <div class="strategic-content" id="strategicContent"></div>
+    </section>
+
+    <!-- Кампания -->
+    <section id="campaign" class="section campaign-section">
+      <h2 class="section-title">🗺 Военная кампания</h2>
+      <p class="section-desc">Прогресс как история. Операции — сюжетный режим.</p>
+      <div class="campaign-list" id="campaignList"></div>
+    </section>
+
+    <!-- Skill Tree -->
+    <section id="skills" class="section skills-section">
+      <h2 class="section-title">⚙️ Дерево навыков</h2>
+      <p class="section-desc">XP распределяется в ранг и навыки. Дисциплина ↑ → меньше штрафов. Фокус ↑ → больше XP за сложные задачи.</p>
+      <div class="skills-grid" id="skillsGrid"></div>
+    </section>
+
+    <!-- Зал славы -->
+    <section id="hall" class="section hall-section">
+      <h2 class="section-title">🏛 Зал славы</h2>
+      <p class="section-desc">Твоя история</p>
+      <div class="hall-grid" id="hallGrid"></div>
     </section>
 
     <!-- Медали -->

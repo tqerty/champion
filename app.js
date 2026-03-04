@@ -287,6 +287,24 @@ const MILITARY_DOCTRINE = [
   'Дорожить честью и славой'
 ];
 
+const CAMPAIGN_OPERATIONS = [
+  { id: 'fundament', name: 'Операция «Фундамент»', desc: 'Базовые привычки', icon: '🏗', target: 7, type: 'streak', unit: 'дней' },
+  { id: 'iron_discipline', name: 'Операция «Железная дисциплина»', desc: '30 дней без пропусков', icon: '⚙', target: 30, type: 'streak', unit: 'дней' },
+  { id: 'engineer', name: 'Операция «Инженер»', desc: '50 часов кода', icon: '💻', target: 50, type: 'program', unit: 'часов' },
+  { id: 'analyst', name: 'Операция «Аналитик»', desc: '100 решённых задач', icon: '🎯', target: 100, type: 'tasks', unit: 'задач' }
+];
+
+const TITLES = [
+  { id: 'iron_discipline', name: 'Железная дисциплина', icon: '⚙', condition: s => s.streakDays >= 30 },
+  { id: 'architect', name: 'Архитектор знаний', icon: '📚', condition: s => { const g = (s.goals || []).find(g => g.templateId === 'logic_book'); return (s.programHours || 0) + (g ? (g.currentValue || 0) : 0) >= 100; } },
+  { id: 'strategist_year', name: 'Стратег года', icon: '🎖', condition: s => s.currentRankIndex >= 9 }
+];
+
+const SECRET_MISSION_XP = 30;
+const MISSED_DAY_PENALTY = 0.05;
+const DEMOBILIZATION_THRESHOLD = 7;
+const REHAB_DAYS_NEEDED = 3;
+
 // ========== СОСТОЯНИЕ ==========
 
 let state = {
@@ -311,7 +329,20 @@ let state = {
   programHours: 0,
   trainCount: 0,
   streakDays: 0,
-  lastTaskDate: null
+  lastTaskDate: null,
+  consecutiveMisses: 0,
+  demobilized: false,
+  rehabDays: 0,
+  hardcoreMode: false,
+  strategicGoal: null,
+  secretMissionActive: null,
+  secretMissionDate: null,
+  skills: { discipline: 0, focus: 0, intelligence: 0, endurance: 0 },
+  skillXP: { discipline: 0, focus: 0, intelligence: 0, endurance: 0 },
+  hallOfFame: { maxStreak: 0, maxDayXP: 0, fastestRankUp: null },
+  dayXP: 0,
+  lastRankUpDate: null,
+  titles: []
 };
 
 // ========== ИНИЦИАЛИЗАЦИЯ ==========
@@ -325,7 +356,60 @@ function loadState() {
   updateQuestProgressFromGoals();
   recalculateRank();
   resetDailyTasksIfNeeded();
+  checkDisciplinaryConsequences();
   checkMedals();
+  checkTitles();
+  trySpawnSecretMission();
+}
+
+function trySpawnSecretMission() {
+  if (state.demobilized) return;
+  const today = new Date().toDateString();
+  if (state.secretMissionDate === today) return;
+  if (Math.random() < 0.15) {
+    state.secretMissionActive = { xp: SECRET_MISSION_XP };
+    state.secretMissionDate = today;
+    saveState();
+  }
+}
+
+function checkDisciplinaryConsequences() {
+  const today = new Date();
+  const lastDate = state.lastTaskDate ? new Date(state.lastTaskDate) : null;
+  if (!lastDate) return;
+  
+  const diffDays = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24));
+  if (diffDays <= 1) return;
+  
+  const missedDays = diffDays - 1;
+  state.consecutiveMisses = missedDays;
+  
+  if (state.demobilized) {
+    state.rehabDays = 0;
+  } else if (missedDays >= DEMOBILIZATION_THRESHOLD) {
+    state.demobilized = true;
+  }
+  saveState();
+}
+
+function applyMissedDayPenalty() {
+  const disciplineLevel = state.skills?.discipline || 0;
+  const effectiveMisses = Math.max(0, (state.consecutiveMisses || 0) - disciplineLevel);
+  const penalty = 1 - Math.min(0.5, effectiveMisses * MISSED_DAY_PENALTY);
+  return Math.max(0.5, penalty);
+}
+
+function resetConsecutiveMisses() {
+  state.consecutiveMisses = 0;
+}
+
+function advanceRehabilitation() {
+  if (!state.demobilized) return;
+  state.rehabDays = (state.rehabDays || 0) + 1;
+  if (state.rehabDays >= REHAB_DAYS_NEEDED) {
+    state.demobilized = false;
+    state.rehabDays = 0;
+  }
 }
 
 function resetDailyTasksIfNeeded() {
@@ -333,6 +417,7 @@ function resetDailyTasksIfNeeded() {
   if (state.lastTaskResetDate !== today) {
     state.tasks.forEach(t => { t.done = false; });
     state.lastTaskResetDate = today;
+    state.dayXP = 0;
     saveState();
   }
 }
@@ -391,6 +476,24 @@ function renderCharacter() {
   if (readinessEl) readinessEl.className = 'combat-readiness readiness-' + readiness;
   if (dot) dot.textContent = readiness === 'high' ? '🟢' : readiness === 'medium' ? '🟡' : '🔴';
   if (textEl) textEl.textContent = readiness === 'high' ? 'Высокая' : readiness === 'medium' ? 'Средняя' : 'Критическая';
+  
+  const status = getMissionStatus();
+  const statusEl = document.getElementById('missionStatus');
+  const statusDot = statusEl?.querySelector('.status-dot');
+  const statusText = document.getElementById('statusText');
+  if (statusEl) statusEl.className = 'mission-status status-' + status;
+  if (statusDot) statusDot.textContent = status === 'active' ? '🟢' : status === 'prep' ? '🟡' : '🔴';
+  if (statusText) statusText.textContent = status === 'active' ? 'В строю' : status === 'prep' ? 'На подготовке' : 'В резерве';
+  
+  document.getElementById('hardcoreMode').checked = !!state.hardcoreMode;
+}
+
+function getMissionStatus() {
+  if (!state.lastTaskDate) return 'reserve';
+  const diff = Math.floor((new Date() - new Date(state.lastTaskDate)) / (1000 * 60 * 60 * 24));
+  if (diff <= 1) return 'active';
+  if (diff <= 3) return 'prep';
+  return 'reserve';
 }
 
 function updateShoulderStraps(rankOrder) {
@@ -454,14 +557,19 @@ function renderGoals() {
 
 function renderTasks() {
   const list = document.getElementById('tasksList');
-  list.innerHTML = state.tasks.map((t, i) => `
-    <div class="task-item ${t.done ? 'done' : ''}" data-index="${i}">
+  const demob = state.demobilized;
+  list.innerHTML = state.tasks.map((t, i) => {
+    const isComplex = t.xp >= 20;
+    const blocked = demob && isComplex;
+    return `
+    <div class="task-item ${t.done ? 'done' : ''} ${blocked ? 'blocked' : ''}" data-index="${i}">
       <div class="task-check ${t.done ? 'checked' : ''}" data-index="${i}" data-toggle></div>
       <span class="task-text">${escapeHtml(t.text)}</span>
       <span class="task-xp">+${t.xp} XP</span>
+      ${blocked ? '<span class="task-blocked">Блок</span>' : ''}
       <button class="delete-btn task-delete" data-index="${i}">×</button>
     </div>
-  `).join('');
+  `}).join('');
 }
 
 function renderCareerTimeline() {
@@ -528,6 +636,139 @@ function renderMilitaryTabs() {
     const moduleForTab = tabIdx < 5 ? 1 : 2;
     btn.classList.toggle('locked', tabIdx >= 0 && moduleForTab > modules);
   });
+}
+
+function renderDisciplineBanner() {
+  const el = document.getElementById('disciplineBanner');
+  if (!el) return;
+  if (state.demobilized) {
+    el.style.display = 'block';
+    el.className = 'banner banner-discipline banner-demob';
+    el.innerHTML = `⚠️ Демобилизация! Сложные миссии заблокированы. Реабилитация: ${state.rehabDays || 0}/${REHAB_DAYS_NEEDED} дней подряд. Выполняй задачи 3 дня подряд для восстановления.`;
+  } else if ((state.consecutiveMisses || 0) > 0) {
+    el.style.display = 'block';
+    el.className = 'banner banner-discipline';
+    el.innerHTML = `❌ Пропущено ${state.consecutiveMisses} дн. Штраф -${Math.min(50, state.consecutiveMisses * 5)}% XP. Выполни задачи — штраф сбросится.`;
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+function renderSecretMissionBanner() {
+  const el = document.getElementById('secretMissionBanner');
+  if (!el) return;
+  if (state.secretMissionActive && state.secretMissionDate === new Date().toDateString() && !state.demobilized) {
+    el.style.display = 'block';
+    el.className = 'banner banner-secret';
+    el.innerHTML = `⚠️ Срочное задание! Выполни любую сложную задачу (≥15 XP) сегодня — получи +${SECRET_MISSION_XP} XP!`;
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+function renderTitles() {
+  const el = document.getElementById('titlesDisplay');
+  if (!el) return;
+  const titles = (state.titles || []).map(id => TITLES.find(t => t.id === id)).filter(Boolean);
+  el.innerHTML = titles.length ? titles.map(t => `<span class="title-badge">${t.icon} ${t.name}</span>`).join(' ') : '';
+}
+
+function renderStrategicGoal() {
+  const el = document.getElementById('strategicContent');
+  if (!el) return;
+  const goal = state.strategicGoal;
+  if (!goal) {
+    el.innerHTML = `
+      <input type="text" id="strategicGoalInput" placeholder="Например: Достичь Лейтенанта до конца года">
+      <button class="btn btn-primary" id="setStrategicGoal">Установить цель</button>
+    `;
+    return;
+  }
+  const targetRank = goal.targetRank;
+  if (targetRank !== null) {
+    const percent = Math.min(100, Math.round((state.totalXP / RANKS[targetRank].xp) * 100));
+    el.innerHTML = `
+      <div class="strategic-goal"><strong>${escapeHtml(goal.text)}</strong></div>
+      <div class="strategic-progress"><div class="strategic-bar" style="width:${percent}%"></div></div>
+      <p>${percent}% выполнения</p>
+    `;
+  } else {
+    el.innerHTML = `<div class="strategic-goal"><strong>${escapeHtml(goal.text)}</strong></div>`;
+  }
+}
+
+function renderCampaign() {
+  const el = document.getElementById('campaignList');
+  if (!el) return;
+  const getProgress = (op) => {
+    if (op.type === 'streak') return Math.min(op.target, state.streakDays);
+    if (op.type === 'program') return Math.min(op.target, state.programHours);
+    if (op.type === 'tasks') return Math.min(op.target, state.totalTasksCompleted || 0);
+    return 0;
+  };
+  el.innerHTML = CAMPAIGN_OPERATIONS.map(op => {
+    const progress = getProgress(op);
+    const done = progress >= op.target;
+    return `
+      <div class="campaign-op ${done ? 'done' : ''}">
+        <div class="campaign-icon">${op.icon}</div>
+        <div class="campaign-info">
+          <div class="campaign-name">${op.name}</div>
+          <div class="campaign-desc">${op.desc}</div>
+          <div class="campaign-bar"><div class="campaign-fill" style="width:${(progress/op.target)*100}%"></div></div>
+          <div class="campaign-progress">${progress}/${op.target} ${op.unit}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderSkills() {
+  const el = document.getElementById('skillsGrid');
+  if (!el) return;
+  const skillData = [
+    { id: 'discipline', name: 'Дисциплина', icon: '📌', desc: 'Меньше штрафов' },
+    { id: 'focus', name: 'Фокус', icon: '🎯', desc: 'Больше XP за сложные задачи' },
+    { id: 'intelligence', name: 'Интеллект', icon: '🧠', desc: 'Элитные миссии' },
+    { id: 'endurance', name: 'Физ. выносливость', icon: '🏋️', desc: 'Бонус за тренировки' }
+  ];
+  el.innerHTML = skillData.map(s => {
+    const level = (state.skills || {})[s.id] || 0;
+    const xp = (state.skillXP || {})[s.id] || 0;
+    const need = 50 + level * 25;
+    return `
+      <div class="skill-item">
+        <div class="skill-icon">${s.icon}</div>
+        <div class="skill-name">${s.name}</div>
+        <div class="skill-desc">${s.desc}</div>
+        <div class="skill-level">Ур. ${level}/10</div>
+        <div class="skill-xp-bar"><div class="skill-xp-fill" style="width:${(xp/need)*100}%"></div></div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderHallOfFame() {
+  const el = document.getElementById('hallGrid');
+  if (!el) return;
+  const h = state.hallOfFame || {};
+  el.innerHTML = `
+    <div class="hall-item">
+      <div class="hall-icon">🔥</div>
+      <div class="hall-label">Самая длинная серия</div>
+      <div class="hall-value">${h.maxStreak || state.streakDays || 0} дней</div>
+    </div>
+    <div class="hall-item">
+      <div class="hall-icon">⚡</div>
+      <div class="hall-label">Самый продуктивный день</div>
+      <div class="hall-value">${h.maxDayXP || 0} XP</div>
+    </div>
+    <div class="hall-item">
+      <div class="hall-icon">📈</div>
+      <div class="hall-label">Текущее звание</div>
+      <div class="hall-value">${RANKS[state.currentRankIndex].name}</div>
+    </div>
+  `;
 }
 
 function renderOfficersSection() {
@@ -669,24 +910,62 @@ function escapeHtml(text) {
 // ========== ЛОГИКА ==========
 
 function getXPMultiplier() {
+  let mult = 1;
   const rank = RANKS[state.currentRankIndex];
-  if (!rank || !rank.bonuses) return 1;
-  const m = rank.bonuses.match(/\+(\d+)% XP/);
-  return m ? 1 + parseInt(m[1]) / 100 : 1;
+  if (rank && rank.bonuses) {
+    const m = rank.bonuses.match(/\+(\d+)% XP/);
+    mult = m ? 1 + parseInt(m[1]) / 100 : 1;
+  }
+  if (state.hardcoreMode) mult *= 1.25;
+  return mult;
 }
 
-function addXP(amount) {
-  const mult = getXPMultiplier();
-  state.totalXP += Math.round(amount * mult);
+function addXP(amount, source) {
+  let mult = getXPMultiplier();
+  if (state.hardcoreMode && source !== 'bonus') mult *= 0.8;
+  const penalty = applyMissedDayPenalty();
+  mult *= penalty;
+  const base = Math.round(amount * mult);
+  state.totalXP += base;
+  state.dayXP = (state.dayXP || 0) + base;
+  if (source === 'task' && base >= 15) distributeSkillXP(base * 0.15);
   checkRankUp();
   checkAchievements();
   checkMedals();
+  updateHallOfFame();
   saveState();
+}
+
+function distributeSkillXP(amount) {
+  state.skills = state.skills || { discipline: 0, focus: 0, intelligence: 0, endurance: 0 };
+  state.skillXP = state.skillXP || { discipline: 0, focus: 0, intelligence: 0, endurance: 0 };
+  const skills = ['discipline', 'focus', 'intelligence', 'endurance'];
+  const idx = Math.floor(Math.random() * skills.length);
+  const skill = skills[idx];
+  state.skillXP[skill] = (state.skillXP[skill] || 0) + amount;
+  const xpForLevel = 50 + (state.skills[skill] || 0) * 25;
+  if (state.skillXP[skill] >= xpForLevel && (state.skills[skill] || 0) < 10) {
+    state.skills[skill] = (state.skills[skill] || 0) + 1;
+    state.skillXP[skill] -= xpForLevel;
+  }
+}
+
+function updateHallOfFame() {
+  state.hallOfFame = state.hallOfFame || { maxStreak: 0, maxDayXP: 0, fastestRankUp: null };
+  if (state.streakDays > (state.hallOfFame.maxStreak || 0)) state.hallOfFame.maxStreak = state.streakDays;
+  if ((state.dayXP || 0) > (state.hallOfFame.maxDayXP || 0)) state.hallOfFame.maxDayXP = state.dayXP;
+}
+
+function checkTitles() {
+  state.titles = state.titles || [];
+  TITLES.forEach(t => {
+    if (!state.titles.includes(t.id) && t.condition(state)) state.titles.push(t.id);
+  });
 }
 
 function awardThankYouLetter() {
   state.thankYouLetters = (state.thankYouLetters || 0) + 1;
-  addXP(THANK_YOU_LETTER_XP);
+  addXP(THANK_YOU_LETTER_XP, 'bonus');
   saveState();
 }
 
@@ -712,7 +991,7 @@ function getCombatReadiness() {
 function unlockAchievement(id) {
   if (!state.achievements.includes(id)) {
     state.achievements.push(id);
-    addXP(ACHIEVEMENT_XP);
+    addXP(ACHIEVEMENT_XP, 'bonus');
   }
 }
 
@@ -753,6 +1032,7 @@ function checkRankUp() {
   const oldRankIndex = state.currentRankIndex;
   recalculateRank();
   if (state.currentRankIndex > oldRankIndex) {
+    state.lastRankUpDate = new Date().toISOString();
     showRankUpAnimation(RANKS[state.currentRankIndex]);
   }
 }
@@ -800,7 +1080,14 @@ function completeTask(index) {
   }
   task.done = true;
   state.totalTasksCompleted = (state.totalTasksCompleted || 0) + 1;
-  addXP(task.xp);
+  let xp = task.xp;
+  if (state.secretMissionActive && state.secretMissionDate === new Date().toDateString() && !state.demobilized) {
+    xp += SECRET_MISSION_XP;
+    state.secretMissionActive = null;
+  }
+  addXP(xp, 'task');
+  resetConsecutiveMisses();
+  advanceRehabilitation();
   
   if (task.goalId) {
     const goal = state.goals.find(g => g.id === task.goalId);
@@ -950,13 +1237,20 @@ function submitTest(testId) {
 
 function renderAll() {
   renderCharacter();
+  renderDisciplineBanner();
+  renderSecretMissionBanner();
+  renderTitles();
   renderAchievements();
   renderGoals();
   renderTasks();
+  renderStrategicGoal();
   renderCareerTimeline();
   renderRankDetail();
   renderRanks();
   renderQuests();
+  renderCampaign();
+  renderSkills();
+  renderHallOfFame();
   renderMilitaryTabs();
   renderOfficersSection();
   renderMedals();
@@ -1034,7 +1328,10 @@ document.getElementById('tasksList').addEventListener('click', (e) => {
   const check = e.target.closest('.task-check[data-toggle]');
   const del = e.target.closest('.task-delete');
   if (check) {
-    completeTask(parseInt(check.dataset.index));
+    const idx = parseInt(check.dataset.index);
+    const task = state.tasks[idx];
+    if (task && state.demobilized && task.xp >= 20) return;
+    completeTask(idx);
     renderAll();
   }
   if (del) {
@@ -1067,6 +1364,29 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 document.addEventListener('DOMContentLoaded', () => {
   renderAll();
   initSpecializationClick();
+  
+  document.getElementById('hardcoreMode')?.addEventListener('change', (e) => {
+    state.hardcoreMode = e.target.checked;
+    saveState();
+    renderAll();
+  });
+  
+  document.addEventListener('click', (e) => {
+    if (e.target.id === 'setStrategicGoal') {
+      const input = document.getElementById('strategicGoalInput');
+      const text = input?.value?.trim();
+      if (text) {
+        state.strategicGoal = { text, targetRank: null, targetYear: new Date().getFullYear() };
+        const m = text.match(/[Лл]ейтенант|[Кк]апитан|[Мм]айор|[Сс]ержант|[Ее]фрейтор/);
+        if (m) {
+          const idx = RANKS.findIndex(r => r.name.toLowerCase().includes(m[0].toLowerCase()));
+          if (idx >= 0) state.strategicGoal.targetRank = idx;
+        }
+        saveState();
+        renderAll();
+      }
+    }
+  });
   
   document.getElementById('thankYouLetterBtn')?.addEventListener('click', () => {
     if (confirm('Выдать благодарственное письмо за доблестное решение сложных задач и достойные поступки? (+15 XP)')) {
