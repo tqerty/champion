@@ -450,13 +450,16 @@ function advanceRehabilitation() {
 }
 
 function resetDailyTasksIfNeeded() {
-  const today = new Date().toDateString();
-  if (state.lastTaskResetDate !== today) {
-    state.tasks.forEach(t => { t.done = false; });
-    state.lastTaskResetDate = today;
-    state.dayXP = 0;
-    saveState();
-  }
+  // Автосброс отключён — задачи и цели сохраняются. Используй кнопку «Сбросить день» для ручного сброса.
+}
+
+function resetDay() {
+  state.tasks.forEach(t => { t.done = false; });
+  state.lastTaskResetDate = new Date().toDateString();
+  state.dayXP = 0;
+  saveState();
+  renderAll();
+  toast('🔄 День сброшен');
 }
 
 function saveState() {
@@ -1671,6 +1674,8 @@ document.getElementById('addTaskBtn').addEventListener('click', () => {
     renderTasks();
   }
 });
+
+document.getElementById('resetDayBtn')?.addEventListener('click', resetDay);
 
 document.getElementById('goalsList').addEventListener('click', (e) => {
   const check = e.target.closest('.goal-check[data-toggle]');
