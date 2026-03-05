@@ -378,7 +378,8 @@ let state = {
   soldierTraining: {
     records: { pushups: 50, squats: 100, calves: 30, crunches: 30, bicycle: 30, book: 15 },
     workoutHistory: []
-  }
+  },
+  logicPagesRead: 0  // Накопительный прогресс по логике — никогда не сбрасывается
 };
 
 // ========== ИНИЦИАЛИЗАЦИЯ ==========
@@ -389,6 +390,7 @@ function loadState() {
     const parsed = JSON.parse(saved);
     state = { ...state, ...parsed };
   }
+  syncLogicPagesRead();  // Синхронизация прогресса логики — защита от сброса
   updateQuestProgressFromGoals();
   recalculateRank();
   resetDailyTasksIfNeeded();
@@ -396,6 +398,16 @@ function loadState() {
   checkMedals();
   checkTitles();
   trySpawnSecretMission();
+}
+
+/** Синхронизирует logicPagesRead с целью и наоборот — прогресс никогда не теряется */
+function syncLogicPagesRead() {
+  const goal = state.goals?.find(g => g.templateId === 'logic_book');
+  const fromGoal = goal ? (goal.currentValue || 0) : 0;
+  const stored = state.logicPagesRead || 0;
+  const maxVal = Math.max(fromGoal, stored);
+  state.logicPagesRead = maxVal;
+  if (goal && goal.currentValue < maxVal) goal.currentValue = maxVal;
 }
 
 function trySpawnSecretMission() {
