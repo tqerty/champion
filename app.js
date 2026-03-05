@@ -392,6 +392,8 @@ function loadState() {
       console.warn('Ошибка загрузки сохранения:', e);
     }
   }
+  if (!Array.isArray(state.tasks)) state.tasks = [];
+  if (!Array.isArray(state.goals)) state.goals = [];
   if (state.lastTaskDate && (!state.activeDays || !state.activeDays[state.lastTaskDate])) {
     state.activeDays = state.activeDays || {};
     state.activeDays[state.lastTaskDate] = true;
@@ -469,7 +471,11 @@ function resetDay() {
 }
 
 function saveState() {
-  localStorage.setItem('champion_state', JSON.stringify(state));
+  try {
+    localStorage.setItem('champion_state', JSON.stringify(state));
+  } catch (e) {
+    console.warn('Не удалось сохранить (возможно, переполнен localStorage):', e);
+  }
 }
 
 function exportProgress() {
@@ -1880,16 +1886,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // ========== СТАРТ ==========
 
 loadState();
-
-// Дефолтные задачи только при первом посещении (когда сохранений ещё не было)
-if (state.tasks.length === 0 && !localStorage.getItem('champion_state')) {
-  state.tasks = [
-    { text: 'Утренняя зарядка', xp: 10, done: false },
-    { text: 'Попрограммировать 1 час', xp: 15, done: false },
-    { text: 'Прочитать 20 страниц', xp: 10, done: false }
-  ];
-  saveState();
-}
 
 renderAll();
 
