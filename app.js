@@ -380,6 +380,30 @@ let state = {
 
 // ========== ИНИЦИАЛИЗАЦИЯ ==========
 
+function extractArrayFromJson(str, key) {
+  const idx = str.indexOf('"' + key + '":');
+  if (idx < 0) return null;
+  const arrStart = str.indexOf('[', idx);
+  if (arrStart < 0) return null;
+  let depth = 0;
+  let inStr = false;
+  let escape = false;
+  for (let i = arrStart; i < str.length; i++) {
+    const c = str[i];
+    if (escape) { escape = false; continue; }
+    if (c === '\\' && inStr) { escape = true; continue; }
+    if ((c === '"' || c === "'") && !inStr) { inStr = c; continue; }
+    if (c === inStr) { inStr = false; continue; }
+    if (!inStr) {
+      if (c === '[') depth++;
+      if (c === ']') { depth--; if (depth === 0) {
+        try { return JSON.parse(str.slice(arrStart, i + 1)); } catch (_) { return null; }
+      }}
+    }
+  }
+  return null;
+}
+
 function loadState() {
   const saved = localStorage.getItem('champion_state');
   if (saved) {
@@ -389,7 +413,17 @@ function loadState() {
         state = { ...state, ...parsed };
       }
     } catch (e) {
-      console.warn('Ошибка загрузки сохранения:', e);
+      console.warn('Ошибка загрузки сохранения, попытка восстановить данные:', e);
+      const tasks = extractArrayFromJson(saved, 'tasks');
+      const goals = extractArrayFromJson(saved, 'goals');
+      if (Array.isArray(tasks)) state.tasks = tasks;
+      if (Array.isArray(goals)) state.goals = goals;
+      const xpMatch = saved.match(/"totalXP"\s*:\s*(\d+)/);
+      if (xpMatch) state.totalXP = parseInt(xpMatch[1], 10);
+      const rankMatch = saved.match(/"currentRankIndex"\s*:\s*(\d+)/);
+      if (rankMatch) state.currentRankIndex = parseInt(rankMatch[1], 10);
+      const nameMatch = saved.match(/"characterName"\s*:\s*"([^"]*)"/);
+      if (nameMatch) state.characterName = nameMatch[1];
     }
   }
   if (!Array.isArray(state.tasks)) state.tasks = [];
