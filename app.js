@@ -333,6 +333,7 @@ let state = {
   totalXP: 0,
   currentRankIndex: 0,
   characterName: 'Минь',
+  characterPhoto: null,
   goals: [],
   tasks: [],
   achievements: [],
@@ -580,6 +581,20 @@ function renderCharacter() {
   
   document.getElementById('hardcoreMode').checked = !!state.hardcoreMode;
   renderRankProgress();
+  const photoEl = document.getElementById('avatarPhoto');
+  const faceEl = document.getElementById('avatarFace');
+  if (state.characterPhoto && photoEl && faceEl) {
+    photoEl.src = state.characterPhoto;
+    photoEl.style.display = 'block';
+    faceEl.style.display = 'none';
+  } else if (photoEl && faceEl) {
+    photoEl.style.display = 'none';
+    faceEl.style.display = 'block';
+  }
+  const removeBtn = document.getElementById('avatarRemoveBtn');
+  const photoBtn = document.getElementById('avatarPhotoBtn');
+  if (removeBtn) removeBtn.style.display = state.characterPhoto ? 'flex' : 'none';
+  if (photoBtn) photoBtn.title = state.characterPhoto ? 'Сменить фото' : 'Установить фото';
 }
 
 function renderRankProgress() {
@@ -1770,6 +1785,40 @@ document.addEventListener('DOMContentLoaded', () => {
     checkWeeklyChallenge();
     saveState();
     renderAll();
+  });
+
+  document.getElementById('avatarRemoveBtn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    state.characterPhoto = null;
+    saveState();
+    renderCharacter();
+    toast('📷 Фото удалено');
+  });
+  document.getElementById('avatarPhotoInput')?.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 200;
+        const w = img.width, h = img.height;
+        const scale = w > h ? max / w : max / h;
+        const cw = Math.round(w * scale), ch = Math.round(h * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = cw;
+        canvas.height = ch;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, cw, ch);
+        state.characterPhoto = canvas.toDataURL('image/jpeg', 0.85);
+        saveState();
+        renderCharacter();
+        toast('📷 Фото установлено');
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
   });
 
   document.getElementById('exportBtn')?.addEventListener('click', exportProgress);

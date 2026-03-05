@@ -49,7 +49,13 @@
         <div class="character-card">
           <div class="character-visual">
             <div class="character-avatar" id="characterAvatar">
-              <div class="avatar-face">М</div>
+              <img class="avatar-photo" id="avatarPhoto" alt="Фото персонажа" style="display:none">
+              <div class="avatar-face" id="avatarFace">М</div>
+              <label class="avatar-photo-btn" id="avatarPhotoBtn" title="Установить фото">
+                <input type="file" id="avatarPhotoInput" accept="image/*" hidden>
+                📷
+              </label>
+              <button class="avatar-remove-btn" id="avatarRemoveBtn" title="Удалить фото" style="display:none">✕</button>
               <div class="shoulder-straps" id="shoulderStraps">
                 <div class="strap left" id="leftStrap"><div class="strap-insignia"></div></div>
                 <div class="strap right" id="rightStrap"><div class="strap-insignia"></div></div>
@@ -95,7 +101,7 @@
               <button class="btn btn-secondary thank-you-btn" id="thankYouLetterBtn" title="За доблестное решение сложных задач и достойные поступки">
                 📜 Благодарственное письмо (+15 XP)
               </button>
-              <label class="hardcore-toggle" title="XP сложнее, штрафы сильнее, бонусы выше">
+              <label class="hardcore-toggle" title="Хардкор: задачи дают −20% XP, бонусы (сундук, достижения) дают +25% XP. Режим для тех, кто хочет сложнее.">
                 <input type="checkbox" id="hardcoreMode">
                 <span class="hardcore-switch"></span>
                 <span class="hardcore-label"><span class="hardcore-icon">⚡</span>Хардкор</span>
