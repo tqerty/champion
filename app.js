@@ -289,6 +289,13 @@ const TITLES = [
   { id: 'strategist_year', name: 'Стратег года', icon: '🎖', condition: s => s.currentRankIndex >= 9 }
 ];
 
+const WEEKLY_CHALLENGES = [
+  { id: 'tasks_7', name: '7 задач за неделю', desc: 'Выполни 7 задач', target: 7, type: 'tasks', xp: 30 },
+  { id: 'tasks_14', name: '14 задач за неделю', desc: 'Выполни 14 задач', target: 14, type: 'tasks', xp: 50 },
+  { id: 'program_5', name: '5 часов кода', desc: 'Попрограммируй 5 часов', target: 5, type: 'program', xp: 40 },
+  { id: 'train_3', name: '3 тренировки', desc: 'Потренируйся 3 раза', target: 3, type: 'train', xp: 25 },
+  { id: 'streak_5', name: '5 дней подряд', desc: 'Выполняй задачи 5 дней', target: 5, type: 'streak', xp: 35 },
+];
 const SECRET_MISSION_XP = 30;
 const MISSED_DAY_PENALTY = 0.05;
 const DEMOBILIZATION_THRESHOLD = 7;
@@ -330,9 +337,12 @@ const RESISTANCE_BAND_EXERCISES = [
 let state = {
   totalXP: 0,
   currentRankIndex: 0,
+  characterName: 'Минь',
   goals: [],
   tasks: [],
   achievements: [],
+  xpHistory: [],
+  activeDays: {},
   lastTaskResetDate: null,
   totalTasksCompleted: 0,
   thankYouLetters: 0,
@@ -367,6 +377,9 @@ let state = {
     records: { pushups: 50, squats: 100, calves: 30, crunches: 30, bicycle: 30, book: 15 },
     workoutHistory: []
   },
+  lightTheme: false,
+  weeklyChallenge: null,
+  weeklyChallengeProgress: {},
 };
 
 // ========== ИНИЦИАЛИЗАЦИЯ ==========
@@ -376,6 +389,10 @@ function loadState() {
   if (saved) {
     const parsed = JSON.parse(saved);
     state = { ...state, ...parsed };
+  }
+  if (state.lastTaskDate && (!state.activeDays || !state.activeDays[state.lastTaskDate])) {
+    state.activeDays = state.activeDays || {};
+    state.activeDays[state.lastTaskDate] = true;
   }
   updateQuestProgressFromGoals();
   recalculateRank();
@@ -450,6 +467,38 @@ function saveState() {
   localStorage.setItem('champion_state', JSON.stringify(state));
 }
 
+function getWeekKey() {
+  const d = new Date();
+  const start = new Date(d);
+  start.setDate(d.getDate() - d.getDay());
+  return start.toDateString();
+}
+
+function initWeeklyChallenge() {
+  const wk = getWeekKey();
+  if (state.weeklyChallenge?.week !== wk) {
+    state.weeklyChallenge = {
+      week: wk,
+      id: WEEKLY_CHALLENGES[Math.floor(Math.random() * WEEKLY_CHALLENGES.length)].id
+    };
+    state.weeklyChallengeProgress = {
+      tasks: 0,
+      programStart: state.programHours || 0,
+      trainStart: state.trainCount || 0
+    };
+  }
+}
+
+function toast(msg, duration = 3000) {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(() => el.remove(), duration);
+}
+
 // ========== КВЕСТЫ: пересчёт из целей (исправление бага) ==========
 
 function updateQuestProgressFromGoals() {
@@ -463,7 +512,8 @@ function renderCharacter() {
   const nextRank = RANKS[state.currentRankIndex + 1];
   
   document.getElementById('displayRank').textContent = rank.name;
-  document.getElementById('characterName').textContent = rank.name + ' Минь';
+  const name = state.characterName || 'Минь';
+  document.getElementById('characterName').textContent = rank.name + ' ' + name;
   document.getElementById('totalXP').textContent = state.totalXP;
   
   if (nextRank) {
@@ -501,6 +551,26 @@ function renderCharacter() {
   if (statusText) statusText.textContent = status === 'active' ? 'В строю' : status === 'prep' ? 'На подготовке' : 'В резерве';
   
   document.getElementById('hardcoreMode').checked = !!state.hardcoreMode;
+  renderRankProgress();
+}
+
+function renderRankProgress() {
+  const el = document.getElementById('rankProgressCard');
+  if (!el) return;
+  const nextRank = RANKS[state.currentRankIndex + 1];
+  if (!nextRank) {
+    el.innerHTML = '<div class="rank-progress-label">🎖 Максимальное звание достигнуто!</div>';
+    return;
+  }
+  const rank = RANKS[state.currentRankIndex];
+  const xpInRank = state.totalXP - rank.xp;
+  const xpNeeded = nextRank.xp - rank.xp;
+  const percent = Math.min(100, (xpInRank / xpNeeded) * 100);
+  const left = Math.max(0, nextRank.xp - state.totalXP);
+  el.innerHTML = `
+    <div class="rank-progress-label">До ${nextRank.name}: <strong>${left}</strong> XP</div>
+    <div class="rank-progress-bar"><div class="rank-progress-fill" style="width:${percent}%"></div></div>
+  `;
 }
 
 function getMissionStatus() {
@@ -593,7 +663,7 @@ function renderAchievements() {
   const grid = document.getElementById('achievementsGrid');
   const allIds = ['first_task', 'efreitor', 'sergeant', 'starshina', 'praporshik', 'officer_career', 'captain', 'major',
     'programming', 'fitness', 'military_test', 'ak47', 'all_tests',
-    'week_streak', 'month_streak'];
+    'week_streak', 'month_streak', 'tasks_100', 'program_50h', 'train_50', 'marshal'];
   
   allIds.forEach(id => {
     const el = grid.querySelector(`[data-id="${id}"]`);
@@ -933,8 +1003,10 @@ function saveSoldierWorkout() {
   
   state.trainCount = (state.trainCount || 0) + 1;
   addXP(5, 'task');
+  checkWeeklyChallenge();
   saveState();
   renderAll();
+  toast('💪 Тренировка записана! +5 XP');
 }
 
 function renderOfficersSection() {
@@ -974,6 +1046,80 @@ function renderDoctrine() {
       <span class="doctrine-text">${rule}</span>
     </div>
   `).join('');
+}
+
+function renderStats() {
+  const el = document.getElementById('statsContent');
+  if (!el) return;
+  const hist = (state.xpHistory || []).slice(-14);
+  const maxXp = Math.max(1, ...hist.map(h => h.xp));
+  el.innerHTML = `
+    <div class="stat-card"><div class="stat-label">Всего XP</div><div class="stat-value">${state.totalXP}</div></div>
+    <div class="stat-card"><div class="stat-label">Задач выполнено</div><div class="stat-value">${state.totalTasksCompleted || 0}</div></div>
+    <div class="stat-card"><div class="stat-label">Серия дней</div><div class="stat-value">${state.streakDays || 0}</div></div>
+    <div class="stat-card"><div class="stat-label">Часов кода</div><div class="stat-value">${state.programHours || 0}</div></div>
+    <div class="stat-card"><div class="stat-label">Тренировок</div><div class="stat-value">${state.trainCount || 0}</div></div>
+    <div class="stat-chart" style="grid-column:1/-1">
+      <h4>XP за последние 14 дней</h4>
+      <div class="chart-bars">
+        ${hist.length ? hist.map(h => `<div class="chart-bar" style="height:${(h.xp / maxXp) * 100}%" title="${h.date}: ${h.xp} XP"></div>`).join('') : '<div class="stat-label">Нет данных</div>'}
+      </div>
+    </div>
+  `;
+}
+
+function renderStreakCalendar() {
+  const el = document.getElementById('streakCalendar');
+  if (!el) return;
+  const days = [];
+  const today = new Date();
+  for (let i = 41; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    days.push(d);
+  }
+  const activeDays = state.activeDays || {};
+  const todayStr = today.toDateString();
+  el.innerHTML = `
+    <h4>Активность за последние 6 недель</h4>
+    <div class="streak-grid">
+      ${days.map(d => {
+        const ds = d.toDateString();
+        const active = !!activeDays[ds];
+        const isToday = ds === todayStr;
+        return `<div class="streak-day ${active ? 'active' : ''} ${isToday ? 'today' : ''}" title="${ds}${active ? ' ✓' : ''}"></div>`;
+      }).join('')}
+    </div>
+    <p class="streak-legend">■ Зелёный — день с выполненными задачами</p>
+  `;
+}
+
+function renderWeeklyChallenges() {
+  const el = document.getElementById('weeklyChallengesList');
+  if (!el) return;
+  initWeeklyChallenge();
+  const wc = state.weeklyChallenge;
+  if (!wc) return;
+  const def = WEEKLY_CHALLENGES.find(c => c.id === wc.id);
+  if (!def) return;
+  const prog = state.weeklyChallengeProgress || {};
+  let progress = 0;
+  if (def.type === 'tasks') progress = prog.tasks || 0;
+  else if (def.type === 'program') progress = (state.programHours || 0) - (prog.programStart || 0);
+  else if (def.type === 'train') progress = (state.trainCount || 0) - (prog.trainStart || 0);
+  else if (def.type === 'streak') progress = Math.min(def.target, state.streakDays || 0);
+  const done = progress >= def.target;
+  const claimed = prog.claimed;
+  el.innerHTML = `
+    <div class="weekly-challenge ${done ? 'done' : ''}">
+      <div class="wc-icon">${done ? '✅' : '🎯'}</div>
+      <div class="wc-info">
+        <div class="wc-name">${def.name}</div>
+        <div class="wc-desc">${def.desc} — ${claimed ? 'Выполнено! +' + def.xp + ' XP' : progress + '/' + def.target}</div>
+        ${!claimed ? `<div class="wc-progress"><div class="wc-fill" style="width:${(progress / def.target) * 100}%"></div></div>` : ''}
+      </div>
+    </div>
+  `;
 }
 
 function renderSpecialization() {
@@ -1094,6 +1240,13 @@ function addXP(amount, source) {
   const base = Math.round(amount * mult);
   state.totalXP += base;
   state.dayXP = (state.dayXP || 0) + base;
+  const today = new Date().toDateString();
+  const hist = state.xpHistory || [];
+  const idx = hist.findIndex(h => h.date === today);
+  if (idx >= 0) hist[idx].xp += base;
+  else hist.push({ date: today, xp: base });
+  if (hist.length > 60) hist.shift();
+  state.xpHistory = hist;
   if (source === 'task' && base >= 15) distributeSkillXP(base * 0.15);
   checkRankUp();
   checkAchievements();
@@ -1158,6 +1311,14 @@ function unlockAchievement(id) {
   if (!state.achievements.includes(id)) {
     state.achievements.push(id);
     addXP(ACHIEVEMENT_XP, 'bonus');
+    const names = { first_task: 'Первый шаг', efreitor: 'Ефрейтор', sergeant: 'Сержант', starshina: 'Старшина', praporshik: 'Прапорщик', officer_career: 'Карьера офицера!', captain: 'Капитан', major: 'Майор', programming: 'Кодер', fitness: 'Атлет', military_test: 'Знаток армии', ak47: 'Эксперт АК-47', week_streak: 'Неделя подряд', month_streak: 'Месяц подряд', all_tests: 'Курсант', tasks_100: 'Сто побед', program_50h: 'Инженер', train_50: 'Мастер спорта', marshal: 'Маршал' };
+    toast('🏆 Достижение: ' + (names[id] || id) + ' (+25 XP)', 4000);
+    const grid = document.getElementById('achievementsGrid');
+    const el = grid?.querySelector(`[data-id="${id}"]`);
+    if (el) {
+      el.classList.add('unlocked', 'unlock-animation');
+      setTimeout(() => el.classList.remove('unlock-animation'), 800);
+    }
   }
 }
 
@@ -1228,6 +1389,33 @@ function checkAchievements() {
   if (state.streakDays >= 7) unlockAchievement('week_streak');
   if (state.streakDays >= 30) unlockAchievement('month_streak');
   if (ALL_TEST_IDS.every(id => state.questProgress[TEST_TO_QUEST[id]] || state.testsPassed[id])) unlockAchievement('all_tests');
+  if ((state.totalTasksCompleted || 0) >= 100) unlockAchievement('tasks_100');
+  if ((state.programHours || 0) >= 50) unlockAchievement('program_50h');
+  if ((state.trainCount || 0) >= 50) unlockAchievement('train_50');
+  if (state.currentRankIndex >= 19) unlockAchievement('marshal');
+}
+
+function checkWeeklyChallenge() {
+  initWeeklyChallenge();
+  const wc = state.weeklyChallenge;
+  if (!wc) return;
+  const def = WEEKLY_CHALLENGES.find(c => c.id === wc.id);
+  if (!def) return;
+  const prog = state.weeklyChallengeProgress || {};
+  let progress = 0;
+  if (def.type === 'tasks') {
+    prog.tasks = (prog.tasks || 0) + 1;
+    progress = prog.tasks;
+  } else if (def.type === 'program') progress = (state.programHours || 0) - (prog.programStart || 0);
+  else if (def.type === 'train') progress = (state.trainCount || 0) - (prog.trainStart || 0);
+  else if (def.type === 'streak') progress = Math.min(def.target, state.streakDays || 0);
+  if (progress >= def.target && !prog.claimed) {
+    prog.claimed = true;
+    addXP(def.xp, 'bonus');
+    toast('🎯 Еженедельный вызов выполнен! +' + def.xp + ' XP', 4000);
+  }
+  state.weeklyChallengeProgress = prog;
+  saveState();
 }
 
 
@@ -1273,8 +1461,11 @@ function completeTask(index) {
     state.streakDays = 1;
   }
   state.lastTaskDate = today;
+  state.activeDays = state.activeDays || {};
+  state.activeDays[today] = true;
   
   saveState();
+  checkWeeklyChallenge();
 }
 
 function uncompleteTask(index) {
@@ -1415,6 +1606,9 @@ function renderAll() {
   renderMedals();
   renderDoctrine();
   renderSpecialization();
+  renderStats();
+  renderStreakCalendar();
+  renderWeeklyChallenges();
 }
 
 document.getElementById('addGoalBtn').addEventListener('click', () => {
@@ -1538,24 +1732,63 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   document.getElementById('thankYouLetterBtn')?.addEventListener('click', () => {
-    if (confirm('Выдать благодарственное письмо за доблестное решение сложных задач и достойные поступки? (+15 XP)')) {
-      awardThankYouLetter();
-      renderAll();
-    }
+    awardThankYouLetter();
+    toast('📜 Благодарственное письмо! +15 XP');
+    renderAll();
   });
   
   document.getElementById('addProgram1')?.addEventListener('click', () => {
     state.programHours++;
     addXP(5);
+    checkWeeklyChallenge();
     saveState();
     renderAll();
   });
   document.getElementById('addTrain1')?.addEventListener('click', () => {
     state.trainCount++;
     addXP(5);
+    checkWeeklyChallenge();
     saveState();
     renderAll();
   });
+
+  document.getElementById('editNameBtn')?.addEventListener('click', () => {
+    const name = prompt('Введите имя персонажа:', state.characterName || 'Минь');
+    if (name != null && name.trim()) {
+      state.characterName = name.trim();
+      saveState();
+      renderCharacter();
+    }
+  });
+
+  document.getElementById('themeToggle')?.addEventListener('click', () => {
+    state.lightTheme = !state.lightTheme;
+    document.body.classList.toggle('light-theme', state.lightTheme);
+    document.getElementById('themeToggle').textContent = state.lightTheme ? '🌙' : '☀️';
+    saveState();
+  });
+
+  if (state.lightTheme) {
+    document.body.classList.add('light-theme');
+    document.getElementById('themeToggle').textContent = '🌙';
+  }
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-link');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const id = entry.target.id;
+      navLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+      });
+    });
+  }, { rootMargin: '-50% 0px -50% 0px' });
+  sections.forEach(s => observer.observe(s));
 });
 
 // ========== СТАРТ ==========

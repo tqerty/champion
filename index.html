@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Чемпион — Твой путь к победе</title>
+  <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -14,9 +15,12 @@
     <!-- Навигация -->
     <nav class="nav">
       <div class="nav-brand">ЧЕМПИОН</div>
+      <button class="theme-toggle" id="themeToggle" title="Светлая/тёмная тема">☀️</button>
       <div class="nav-links">
         <a href="#hero" class="nav-link smooth-scroll">Персонаж</a>
+        <a href="#stats" class="nav-link">Статистика</a>
         <a href="#achievements" class="nav-link">Достижения</a>
+        <a href="#weekly-challenges" class="nav-link">Вызовы</a>
         <a href="#goals" class="nav-link">Цели</a>
         <a href="#tasks" class="nav-link">Задачи</a>
         <a href="#ranks" class="nav-link">Звания</a>
@@ -53,8 +57,12 @@
             </div>
           </div>
           <div class="character-info">
-            <h1 class="character-name" id="characterName">Рядовой Минь</h1>
+            <div class="character-name-wrap">
+              <h1 class="character-name" id="characterName">Рядовой Минь</h1>
+              <button class="edit-name-btn" id="editNameBtn" title="Изменить имя">✏️</button>
+            </div>
             <p class="character-rank" id="displayRank">Рядовой</p>
+            <div class="rank-progress-card" id="rankProgressCard"></div>
             <div class="mission-status" id="missionStatus">
               <span class="status-dot"></span>
               <span class="status-label">Статус: <strong id="statusText">—</strong></span>
@@ -176,7 +184,42 @@
           <div class="achievement-name">Курсант</div>
           <div class="achievement-desc">Пройди все военные тесты</div>
         </div>
+        <div class="achievement" data-id="tasks_100">
+          <div class="achievement-icon">🎯</div>
+          <div class="achievement-name">Сто побед</div>
+          <div class="achievement-desc">Выполни 100 задач</div>
+        </div>
+        <div class="achievement" data-id="program_50h">
+          <div class="achievement-icon">💻</div>
+          <div class="achievement-name">Инженер</div>
+          <div class="achievement-desc">50 часов программирования</div>
+        </div>
+        <div class="achievement" data-id="train_50">
+          <div class="achievement-icon">🏋️</div>
+          <div class="achievement-name">Мастер спорта</div>
+          <div class="achievement-desc">50 тренировок</div>
+        </div>
+        <div class="achievement" data-id="marshal">
+          <div class="achievement-icon">⭐</div>
+          <div class="achievement-name">Маршал</div>
+          <div class="achievement-desc">Достигни звания Маршала РФ</div>
+        </div>
       </div>
+    </section>
+
+    <!-- Статистика и графики -->
+    <section id="stats" class="section stats-section">
+      <h2 class="section-title">📊 Статистика</h2>
+      <p class="section-desc">Прогресс по дням, XP и активность</p>
+      <div class="stats-content" id="statsContent"></div>
+      <div class="streak-calendar" id="streakCalendar"></div>
+    </section>
+
+    <!-- Еженедельные вызовы -->
+    <section id="weekly-challenges" class="section weekly-section">
+      <h2 class="section-title">🎯 Еженедельные вызовы</h2>
+      <p class="section-desc">Выполни вызовы за неделю — получи бонусный XP</p>
+      <div class="weekly-challenges-list" id="weeklyChallengesList"></div>
     </section>
 
     <!-- Мои цели -->
@@ -645,6 +688,8 @@
         <button class="btn btn-primary" id="submitTest" style="display:none">Проверить</button>
       </div>
     </div>
+
+    <div id="toastContainer" class="toast-container"></div>
 
     <footer class="footer">
       <p>Чемпион — твой путь к победе. Рядовой Минь гордится тобой! 💪</p>

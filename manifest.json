@@ -1,0 +1,11 @@
+{
+  "name": "Чемпион — Твой путь к победе",
+  "short_name": "Чемпион",
+  "description": "Геймификация продуктивности: задачи, звания, тренировки",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0d1f0d",
+  "theme_color": "#c9a227",
+  "orientation": "portrait-primary",
+  "icons": []
+}
