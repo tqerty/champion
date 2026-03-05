@@ -383,8 +383,14 @@ let state = {
 function loadState() {
   const saved = localStorage.getItem('champion_state');
   if (saved) {
-    const parsed = JSON.parse(saved);
-    state = { ...state, ...parsed };
+    try {
+      const parsed = JSON.parse(saved);
+      if (parsed && typeof parsed === 'object') {
+        state = { ...state, ...parsed };
+      }
+    } catch (e) {
+      console.warn('Ошибка загрузки сохранения:', e);
+    }
   }
   if (state.lastTaskDate && (!state.activeDays || !state.activeDays[state.lastTaskDate])) {
     state.activeDays = state.activeDays || {};
@@ -1875,12 +1881,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 loadState();
 
-if (state.tasks.length === 0) {
+// Дефолтные задачи только при первом посещении (когда сохранений ещё не было)
+if (state.tasks.length === 0 && !localStorage.getItem('champion_state')) {
   state.tasks = [
     { text: 'Утренняя зарядка', xp: 10, done: false },
     { text: 'Попрограммировать 1 час', xp: 15, done: false },
     { text: 'Прочитать 20 страниц', xp: 10, done: false }
   ];
+  saveState();
 }
 
 renderAll();
