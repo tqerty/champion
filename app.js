@@ -327,11 +327,6 @@ const SOLDIER_TRAINING_STANDARDS = [
   { rank: 19, pushups: 130, squats: 250, calves: 110, crunches: 120, bicycle: 120, book: 65 }
 ];
 
-const RESISTANCE_BAND_EXERCISES = [
-  { id: 'band_arms', name: 'Резина на руки', resistance: '5–10 кг', desc: 'На каждую руку' },
-  { id: 'band_legs', name: 'Резина на ноги', resistance: '15 кг', desc: 'Приседания, отведения' }
-];
-
 // ========== СОСТОЯНИЕ ==========
 
 let state = {
@@ -923,10 +918,6 @@ function renderSoldierTraining() {
         <div class="std-item ${passed('bicycle') ? 'passed' : ''}"><span class="std-icon">🚴</span><span>Велосипед</span><strong>${std.bicycle}</strong></div>
         <div class="std-item ${passed('book') ? 'passed' : ''}"><span class="std-icon">📖</span><span>Книжка</span><strong>${std.book}</strong></div>
       </div>
-      <div class="standards-resistance">
-        <h4>Резина</h4>
-        <p>Руки: 5–10 кг на каждую. Ноги: 15 кг. Добавь повторения в форму ниже.</p>
-      </div>
     `;
   }
   
@@ -964,8 +955,6 @@ function renderSoldierTraining() {
         <label>Скручивания <input type="number" id="inCrunches" min="0" placeholder="30"></label>
         <label>Велосипед <input type="number" id="inBicycle" min="0" placeholder="30"></label>
         <label>Книжка <input type="number" id="inBook" min="0" placeholder="15"></label>
-        <label>Резина руки (5–10кг) <input type="number" id="inBandArms" min="0" placeholder="повторений"></label>
-        <label>Резина ноги (15кг) <input type="number" id="inBandLegs" min="0" placeholder="повторений"></label>
       </div>
       <button class="btn btn-primary" id="saveWorkoutBtn">Сохранить тренировку</button>
     `;
@@ -983,10 +972,8 @@ function saveSoldierWorkout() {
     crunches: getVal('inCrunches'),
     bicycle: getVal('inBicycle'),
     book: getVal('inBook'),
-    bandArms: getVal('inBandArms'),
-    bandLegs: getVal('inBandLegs')
   };
-  if (!workout.pushups && !workout.squats && !workout.calves && !workout.crunches && !workout.bicycle && !workout.book && !workout.bandArms && !workout.bandLegs) return;
+  if (!workout.pushups && !workout.squats && !workout.calves && !workout.crunches && !workout.bicycle && !workout.book) return;
   
   state.soldierTraining = state.soldierTraining || { records: {}, workoutHistory: [] };
   state.soldierTraining.workoutHistory = state.soldierTraining.workoutHistory || [];
