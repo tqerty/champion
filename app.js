@@ -462,6 +462,39 @@ function saveState() {
   localStorage.setItem('champion_state', JSON.stringify(state));
 }
 
+function exportProgress() {
+  const data = localStorage.getItem('champion_state') || JSON.stringify(state);
+  const blob = new Blob([data], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'champion-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('📥 Прогресс скачан');
+}
+
+function importProgress(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data || typeof data !== 'object') throw new Error('Неверный формат');
+      state = { ...state, ...data };
+      saveState();
+      updateQuestProgressFromGoals();
+      recalculateRank();
+      checkMedals();
+      checkTitles();
+      renderAll();
+      toast('📤 Прогресс загружен');
+    } catch (err) {
+      toast('❌ Ошибка: неверный файл');
+    }
+  };
+  reader.readAsText(file);
+}
+
 function getWeekKey() {
   const d = new Date();
   const start = new Date(d);
@@ -1737,6 +1770,12 @@ document.addEventListener('DOMContentLoaded', () => {
     checkWeeklyChallenge();
     saveState();
     renderAll();
+  });
+
+  document.getElementById('exportBtn')?.addEventListener('click', exportProgress);
+  document.getElementById('importInput')?.addEventListener('change', (e) => {
+    importProgress(e.target.files?.[0]);
+    e.target.value = '';
   });
 
   document.getElementById('editNameBtn')?.addEventListener('click', () => {

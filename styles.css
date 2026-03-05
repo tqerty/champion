@@ -976,6 +976,7 @@ input:focus {
   border: 2px solid var(--gold);
 }
 
+.import-btn { cursor: pointer; margin: 0; }
 .btn-secondary:hover {
   background: rgba(201, 162, 39, 0.2);
   transform: translateY(-2px);
