@@ -12,7 +12,7 @@ const RANKS = [
     skill: null, dailyQuests: 3 },
   { id: 'efreitor', name: 'Ефрейтор', xp: 100, order: 1, modules: 2,
     desc: 'Звание за проявленную дисциплину и первые достижения.',
-    requirements: '100 XP, книга по логике (30 стр)',
+    requirements: '100 XP',
     bonuses: '+5% XP, +1 ежедневный квест',
     capabilities: ['Модуль 2: Тактика и оружие', 'Навык: Дисциплина I'],
     skill: 'Дисциплина I', dailyQuests: 4 },
@@ -126,21 +126,10 @@ const RANKS = [
     skill: 'Маршал', dailyQuests: 15 }
 ];
 
-const GOAL_TEMPLATES = [
-  {
-    id: 'logic_book',
-    name: 'Прочитать книгу по логике',
-    dailyTask: '3 стр по логике',
-    dailyXP: 10,
-    questTarget: 30,
-    perTask: 3,
-    questId: 'read_logic'
-  }
-];
+const GOAL_TEMPLATES = [];
 
 const RANK_QUESTS = {
   efreitor: [
-    { id: 'read_logic', name: 'Книга по логике (30 стр)', type: 'goal' },
     { id: 'xp_100', name: 'Набрать 100 XP', type: 'xp' }
   ],
   ml_sergeant: [
@@ -268,7 +257,7 @@ const MEDALS = [
   { id: 'streak_7', icon: '🥇', name: '7 дней без пропуска', desc: 'Выполняй задачи 7 дней подряд', check: s => s.streakDays >= 7 },
   { id: 'streak_30', icon: '🏅', name: '30 дней без пропуска', desc: 'Месяц дисциплины', check: s => s.streakDays >= 30 },
   { id: 'tasks_100', icon: '🎯', name: '100 задач выполнено', desc: 'Сто побед над собой', check: s => (s.totalTasksCompleted || 0) >= 100 },
-  { id: 'learn_50h', icon: '🧠', name: '50 часов обучения', desc: 'Программирование + чтение', check: s => { const g = (s.goals || []).find(g => g.templateId === 'logic_book'); return (s.programHours || 0) + (g ? (g.currentValue || 0) : 0) >= 50; } },
+  { id: 'learn_50h', icon: '🧠', name: '50 часов обучения', desc: 'Попрограммировать 50 часов', check: s => (s.programHours || 0) >= 50 },
   { id: 'all_tests_medal', icon: '📋', name: 'Курсант-отличник', desc: 'Все военные тесты пройдены', check: s => ALL_TEST_IDS.every(id => s.questProgress[TEST_TO_QUEST[id]] || s.testsPassed[id]) },
   { id: 'thank_you_3', icon: '📜', name: 'Три благодарности', desc: 'Три благодарственных письма', check: s => (s.thankYouLetters || 0) >= 3 }
 ];
@@ -296,7 +285,7 @@ const CAMPAIGN_OPERATIONS = [
 
 const TITLES = [
   { id: 'iron_discipline', name: 'Железная дисциплина', icon: '⚙', condition: s => s.streakDays >= 30 },
-  { id: 'architect', name: 'Архитектор знаний', icon: '📚', condition: s => { const g = (s.goals || []).find(g => g.templateId === 'logic_book'); return (s.programHours || 0) + (g ? (g.currentValue || 0) : 0) >= 100; } },
+  { id: 'architect', name: 'Архитектор знаний', icon: '📚', condition: s => (s.programHours || 0) >= 100 },
   { id: 'strategist_year', name: 'Стратег года', icon: '🎖', condition: s => s.currentRankIndex >= 9 }
 ];
 
@@ -349,7 +338,6 @@ let state = {
   thankYouLetters: 0,
   specialization: null,
   questProgress: {
-    read_logic: false,
     program_2h: false, program_5h: false, program_8h: false,
     train_3: false, train_5: false, train_8: false,
     military_test: false, tactics_test: false, ranks_test: false,
@@ -379,7 +367,6 @@ let state = {
     records: { pushups: 50, squats: 100, calves: 30, crunches: 30, bicycle: 30, book: 15 },
     workoutHistory: []
   },
-  logicPagesRead: 0  // Накопительный прогресс по логике — никогда не сбрасывается
 };
 
 // ========== ИНИЦИАЛИЗАЦИЯ ==========
@@ -390,7 +377,6 @@ function loadState() {
     const parsed = JSON.parse(saved);
     state = { ...state, ...parsed };
   }
-  syncLogicPagesRead();  // Синхронизация прогресса логики — защита от сброса
   updateQuestProgressFromGoals();
   recalculateRank();
   resetDailyTasksIfNeeded();
@@ -398,16 +384,6 @@ function loadState() {
   checkMedals();
   checkTitles();
   trySpawnSecretMission();
-}
-
-/** Синхронизирует logicPagesRead с целью и наоборот — прогресс никогда не теряется */
-function syncLogicPagesRead() {
-  const goal = state.goals?.find(g => g.templateId === 'logic_book');
-  const fromGoal = goal ? (goal.currentValue || 0) : 0;
-  const stored = state.logicPagesRead || 0;
-  const maxVal = Math.max(fromGoal, stored);
-  state.logicPagesRead = maxVal;
-  if (goal && goal.currentValue < maxVal) goal.currentValue = maxVal;
 }
 
 function trySpawnSecretMission() {
@@ -477,17 +453,7 @@ function saveState() {
 // ========== КВЕСТЫ: пересчёт из целей (исправление бага) ==========
 
 function updateQuestProgressFromGoals() {
-  state.questProgress.read_logic = false;
-  const logicTarget = 30;
-  state.goals.forEach(g => {
-    if (g.templateId === 'logic_book' || (g.text && (g.text.toLowerCase().includes('логик') || g.text.toLowerCase().includes('логике')))) {
-      if (g.templateId === 'logic_book') {
-        state.questProgress.read_logic = (g.currentValue || 0) >= Math.min(logicTarget, g.questTarget || 30);
-      } else {
-        state.questProgress.read_logic = (g.currentValue || 0) >= logicTarget || g.done;
-      }
-    }
-  });
+  // Резерв для будущих целей с квестами
 }
 
 // ========== РЕНДЕРИНГ ==========
@@ -626,7 +592,7 @@ function getRankInsigniaHTML(rankOrder) {
 function renderAchievements() {
   const grid = document.getElementById('achievementsGrid');
   const allIds = ['first_task', 'efreitor', 'sergeant', 'starshina', 'praporshik', 'officer_career', 'captain', 'major',
-    'logic_book', 'logic_pages', 'programming', 'fitness', 'military_test', 'ak47', 'all_tests',
+    'programming', 'fitness', 'military_test', 'ak47', 'all_tests',
     'week_streak', 'month_streak'];
   
   allIds.forEach(id => {
@@ -1255,8 +1221,6 @@ function checkAchievements() {
   if (state.currentRankIndex >= 8) unlockAchievement('officer_career');
   if (state.currentRankIndex >= 11) unlockAchievement('captain');
   if (state.currentRankIndex >= 12) unlockAchievement('major');
-  if (state.questProgress.read_logic) unlockAchievement('logic_book');
-  if (getLogicPagesRead() >= 30) unlockAchievement('logic_pages');
   if (state.programHours >= 10) unlockAchievement('programming');
   if (state.trainCount >= 20) unlockAchievement('fitness');
   if (state.questProgress.military_test) unlockAchievement('military_test');
@@ -1266,10 +1230,6 @@ function checkAchievements() {
   if (ALL_TEST_IDS.every(id => state.questProgress[TEST_TO_QUEST[id]] || state.testsPassed[id])) unlockAchievement('all_tests');
 }
 
-function getLogicPagesRead() {
-  const goal = state.goals.find(g => g.templateId === 'logic_book');
-  return goal ? (goal.currentValue || 0) : 0;
-}
 
 function completeTask(index) {
   const task = state.tasks[index];
@@ -1352,10 +1312,7 @@ function toggleGoal(index) {
     } else {
       goal.done = true;
     }
-    const text = (goal.text || '').toLowerCase();
-    if (text.includes('логик') || text.includes('логике') || goal.templateId === 'logic_book') {
-      updateQuestProgressFromGoals();
-    }
+    updateQuestProgressFromGoals();
     checkAchievements();
   }
   saveState();
@@ -1465,21 +1422,7 @@ document.getElementById('addGoalBtn').addEventListener('click', () => {
   const text = input.value.trim();
   if (!text) return;
   
-  const template = GOAL_TEMPLATES.find(t => text.toLowerCase().includes('логик'));
-  if (template) {
-    const id = 'goal_' + Date.now();
-    state.goals.push({
-      id, text: template.name, done: false,
-      templateId: template.id, questTarget: template.questTarget,
-      currentValue: 0, perTask: template.perTask
-    });
-    state.tasks.push({
-      text: template.dailyTask, xp: template.dailyXP, done: false,
-      goalId: id
-    });
-  } else {
-    state.goals.push({ text, done: false });
-  }
+  state.goals.push({ text, done: false });
   input.value = '';
   saveState();
   renderGoals();
